@@ -377,14 +377,23 @@ function renderWeightChart() {
 }
 
 // --- Main UI Rendering & Dom Updates ---
+// Safe helper: set innerText only if element exists
+function safeText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+}
+function safeHTML(id, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+}
+
 function updateUI() {
+    try {
     // Current Date updates
     const now = new Date();
     const formattedNow = formatDate(now);
-    const dashDateEl = document.getElementById('dashboard-date');
-    if (dashDateEl) dashDateEl.innerText = formattedNow;
-    const diaryDateEl = document.getElementById('diary-current-date');
-    if (diaryDateEl) diaryDateEl.innerText = formattedNow;
+    safeText('dashboard-date', formattedNow);
+    safeText('diary-current-date', formattedNow);
 
     // Header Greeting
     const greetingEl = document.getElementById('header-greeting');
@@ -406,24 +415,22 @@ function updateUI() {
     const streakDays = state.streak.current;
 
     // Is checked in today check?
-    // Today index is index 29 (the last one) in history30Days
     const todayChecked = state.streak.history30Days[29] === 1;
 
     // Update stats labels
-    document.getElementById('val-weight-current').innerText = currentWeight.toFixed(1);
-    document.getElementById('val-weight-target').innerText = targetWeight.toFixed(1);
-    document.getElementById('val-weight-lost').innerText = lostWeight;
-    document.getElementById('val-weight-start').innerText = `Từ ${startWeight.toFixed(1)} kg`;
-    document.getElementById('val-streak').innerText = streakDays;
-    document.getElementById('banner-streak-days').innerText = streakDays;
-    document.getElementById('discipline-streak-current').innerText = streakDays;
+    safeText('val-weight-current', currentWeight.toFixed(1));
+    safeText('val-weight-target', targetWeight.toFixed(1));
+    safeText('val-weight-lost', lostWeight);
+    safeText('val-weight-start', `Từ ${startWeight.toFixed(1)} kg`);
+    safeText('val-streak', streakDays);
+    safeText('banner-streak-days', streakDays);
+    safeText('discipline-streak-current', streakDays);
 
     // Compliance estimation
-    // Calculated by counting checks out of 30 days
     const checkedDays = state.streak.history30Days.filter(h => h === 1).length;
     const compliancePercent = Math.round((checkedDays / 30) * 100);
-    document.getElementById('val-compliance').innerText = compliancePercent;
-    document.getElementById('discipline-compliance-month').innerText = compliancePercent;
+    safeText('val-compliance', compliancePercent);
+    safeText('discipline-compliance-month', compliancePercent);
 
     // Calories calculation
     const caloriesState = calculateCurrentDayCalories();
@@ -433,19 +440,21 @@ function updateUI() {
     const kcalPercent = Math.min(100, Math.round((kcalConsumed / kcalTarget) * 100));
 
     // Dashboard values
-    document.getElementById('dash-kcal-consumed').innerText = kcalConsumed.toLocaleString('vi-VN');
-    document.getElementById('dash-kcal-target').innerText = kcalTarget.toLocaleString('vi-VN');
+    safeText('dash-kcal-consumed', kcalConsumed.toLocaleString('vi-VN'));
+    safeText('dash-kcal-target', kcalTarget.toLocaleString('vi-VN'));
     
     const dashRemainEl = document.getElementById('dash-kcal-remain');
-    if (kcalRemain > 0) {
-        dashRemainEl.innerText = `${kcalRemain.toLocaleString('vi-VN')} kcal`;
-        dashRemainEl.className = 'text-green';
-    } else {
-        dashRemainEl.innerText = `Hoàn thành`;
-        dashRemainEl.className = 'text-orange-dark';
+    if (dashRemainEl) {
+        if (kcalRemain > 0) {
+            dashRemainEl.innerText = `${kcalRemain.toLocaleString('vi-VN')} kcal`;
+            dashRemainEl.className = 'text-green';
+        } else {
+            dashRemainEl.innerText = `Hoàn thành`;
+            dashRemainEl.className = 'text-orange-dark';
+        }
     }
 
-    // SVG Ring animate: Dasharray of circle is 2*pi*r = 2 * 3.14 * 60 = 377
+    // SVG Ring animate
     const circleLen = 377;
     const dashOffset = circleLen - (circleLen * (kcalPercent / 100));
     const ringEl = document.getElementById('calorie-progress-ring');
@@ -454,43 +463,48 @@ function updateUI() {
     }
 
     // Dashboard macros progress bar
-    document.getElementById('dash-protein-curr').innerText = caloriesState.protein;
-    document.getElementById('dash-protein-target').innerText = state.nutrition.proteinTarget;
+    safeText('dash-protein-curr', caloriesState.protein);
+    safeText('dash-protein-target', state.nutrition.proteinTarget);
     const pPct = Math.min(100, Math.round((caloriesState.protein / state.nutrition.proteinTarget) * 100));
-    document.getElementById('dash-protein-bar').style.width = `${pPct}%`;
+    const pBar = document.getElementById('dash-protein-bar');
+    if (pBar) pBar.style.width = `${pPct}%`;
 
-    document.getElementById('dash-carb-curr').innerText = caloriesState.carb;
-    document.getElementById('dash-carb-target').innerText = state.nutrition.carbTarget;
+    safeText('dash-carb-curr', caloriesState.carb);
+    safeText('dash-carb-target', state.nutrition.carbTarget);
     const cPct = Math.min(100, Math.round((caloriesState.carb / state.nutrition.carbTarget) * 100));
-    document.getElementById('dash-carb-bar').style.width = `${cPct}%`;
+    const cBar = document.getElementById('dash-carb-bar');
+    if (cBar) cBar.style.width = `${cPct}%`;
 
-    document.getElementById('dash-fat-curr').innerText = caloriesState.fat;
-    document.getElementById('dash-fat-target').innerText = state.nutrition.fatTarget;
+    safeText('dash-fat-curr', caloriesState.fat);
+    safeText('dash-fat-target', state.nutrition.fatTarget);
     const fPct = Math.min(100, Math.round((caloriesState.fat / state.nutrition.fatTarget) * 100));
-    document.getElementById('dash-fat-bar').style.width = `${fPct}%`;
+    const fBar = document.getElementById('dash-fat-bar');
+    if (fBar) fBar.style.width = `${fPct}%`;
 
     // Screen 2 Nutrition targets values
-    document.getElementById('plan-kcal-val').innerText = kcalTarget.toLocaleString('vi-VN');
-    document.getElementById('plan-protein-val').innerText = state.nutrition.proteinTarget;
-    document.getElementById('plan-carb-val').innerText = state.nutrition.carbTarget;
-    document.getElementById('plan-fat-val').innerText = state.nutrition.fatTarget;
+    safeText('plan-kcal-val', kcalTarget.toLocaleString('vi-VN'));
+    safeText('plan-protein-val', state.nutrition.proteinTarget);
+    safeText('plan-carb-val', state.nutrition.carbTarget);
+    safeText('plan-fat-val', state.nutrition.fatTarget);
 
     // Screen 4 Food Diary calories
-    document.getElementById('diary-kcal-consumed').innerText = kcalConsumed.toLocaleString('vi-VN');
-    document.getElementById('diary-kcal-target').innerText = kcalTarget.toLocaleString('vi-VN');
+    safeText('diary-kcal-consumed', kcalConsumed.toLocaleString('vi-VN'));
+    safeText('diary-kcal-target', kcalTarget.toLocaleString('vi-VN'));
     
     const diaryRemainEl = document.getElementById('diary-kcal-remain');
-    if (kcalRemain > 0) {
-        diaryRemainEl.innerText = kcalRemain.toLocaleString('vi-VN');
-        diaryRemainEl.className = 'text-green';
-    } else {
-        diaryRemainEl.innerText = `Xong`;
-        diaryRemainEl.className = 'text-orange-dark';
+    if (diaryRemainEl) {
+        if (kcalRemain > 0) {
+            diaryRemainEl.innerText = kcalRemain.toLocaleString('vi-VN');
+            diaryRemainEl.className = 'text-green';
+        } else {
+            diaryRemainEl.innerText = `Xong`;
+            diaryRemainEl.className = 'text-orange-dark';
+        }
     }
 
-    const diaryProgressPercentEl = document.getElementById('diary-progress-percent');
-    diaryProgressPercentEl.innerText = `${kcalPercent}% hoàn thành mục tiêu`;
-    document.getElementById('diary-progress-bar').style.width = `${kcalPercent}%`;
+    safeText('diary-progress-percent', `${kcalPercent}% hoàn thành mục tiêu`);
+    const diaryBar = document.getElementById('diary-progress-bar');
+    if (diaryBar) diaryBar.style.width = `${kcalPercent}%`;
 
     // Dynamic warning text block
     const warningStatusEl = document.getElementById('dash-warning-status');
@@ -499,28 +513,42 @@ function updateUI() {
         if (warningStatusEl) {
             warningStatusEl.innerText = "Hôm nay bạn đã check-in!";
             warningStatusEl.className = "warning-title text-green";
-            warningStatusEl.closest('.warning-box-body').querySelector('.warning-icon-large').className = "warning-icon-large text-green";
-            warningStatusEl.closest('.warning-box-body').querySelector('.warning-icon-large i').setAttribute('data-lucide', 'check-circle');
+            const bodyEl = warningStatusEl.closest('.warning-box-body');
+            if (bodyEl) {
+                const iconEl = bodyEl.querySelector('.warning-icon-large');
+                if (iconEl) {
+                    iconEl.className = "warning-icon-large text-green";
+                    const iEl = iconEl.querySelector('i');
+                    if (iEl) iEl.setAttribute('data-lucide', 'check-circle');
+                }
+            }
         }
         if (btnCheckinPrev) {
             btnCheckinPrev.innerText = "Đã check-in";
             btnCheckinPrev.disabled = true;
             btnCheckinPrev.style.opacity = "0.6";
         }
-        document.getElementById('val-weight-update-time').innerText = "Cập nhật: Mới xong";
+        safeText('val-weight-update-time', "Cập nhật: Mới xong");
     } else {
         if (warningStatusEl) {
             warningStatusEl.innerText = "Bạn chưa check-in hôm nay!";
             warningStatusEl.className = "warning-title text-orange";
-            warningStatusEl.closest('.warning-box-body').querySelector('.warning-icon-large').className = "warning-icon-large text-orange";
-            warningStatusEl.closest('.warning-box-body').querySelector('.warning-icon-large i').setAttribute('data-lucide', 'alert-triangle');
+            const bodyEl = warningStatusEl.closest('.warning-box-body');
+            if (bodyEl) {
+                const iconEl = bodyEl.querySelector('.warning-icon-large');
+                if (iconEl) {
+                    iconEl.className = "warning-icon-large text-orange";
+                    const iEl = iconEl.querySelector('i');
+                    if (iEl) iEl.setAttribute('data-lucide', 'alert-triangle');
+                }
+            }
         }
         if (btnCheckinPrev) {
             btnCheckinPrev.innerText = "Check-in ngay";
             btnCheckinPrev.disabled = false;
             btnCheckinPrev.style.opacity = "1";
         }
-        document.getElementById('val-weight-update-time').innerText = "Cập nhật: Hôm nay";
+        safeText('val-weight-update-time', "Cập nhật: Hôm nay");
     }
 
     // Mini sidebar updates for checked/unchecked preview
@@ -559,12 +587,12 @@ function updateUI() {
     const waterTarget = state.water.target;
     const waterRemain = Math.max(0, waterTarget - waterLiters);
     
-    document.getElementById('dash-water-volume').innerText = waterLiters.toFixed(1);
-    document.getElementById('dash-water-remain').innerText = waterRemain.toFixed(1);
+    safeText('dash-water-volume', waterLiters.toFixed(1));
+    safeText('dash-water-remain', waterRemain.toFixed(1));
 
-    document.getElementById('water-current-text').innerHTML = `${waterLiters.toFixed(1)} <span class="unit">lít</span>`;
-    document.getElementById('water-missing-liters').innerText = waterRemain.toFixed(1);
-    document.getElementById('water-missing-glasses').innerText = Math.ceil(waterRemain / 0.25);
+    safeHTML('water-current-text', `${waterLiters.toFixed(1)} <span class="unit">lít</span>`);
+    safeText('water-missing-liters', waterRemain.toFixed(1));
+    safeText('water-missing-glasses', Math.ceil(waterRemain / 0.25));
 
     // Height of water cylinder animation
     const waterPercent = Math.min(100, Math.round((waterLiters / waterTarget) * 100));
@@ -582,27 +610,37 @@ function updateUI() {
         if (waterAlertEl) {
             waterAlertEl.style.backgroundColor = 'var(--color-green-light)';
             waterAlertEl.style.borderColor = 'var(--color-green)';
-            waterAlertEl.querySelector('.alert-icon').style.color = 'var(--color-green)';
-            waterAlertEl.querySelector('.alert-body h4').innerText = "Đã đủ lượng nước cần thiết!";
-            waterAlertEl.querySelector('.alert-body p').innerText = "Tuyệt vời! Bạn đã hoàn thành 100% mục tiêu uống nước hôm nay.";
+            const alertIcon = waterAlertEl.querySelector('.alert-icon');
+            if (alertIcon) alertIcon.style.color = 'var(--color-green)';
+            const alertH4 = waterAlertEl.querySelector('.alert-body h4');
+            if (alertH4) alertH4.innerText = "Đã đủ lượng nước cần thiết!";
+            const alertP = waterAlertEl.querySelector('.alert-body p');
+            if (alertP) alertP.innerText = "Tuyệt vời! Bạn đã hoàn thành 100% mục tiêu uống nước hôm nay.";
         }
     } else {
         if (waterAlertEl) {
             waterAlertEl.style.backgroundColor = 'var(--color-blue-light)';
             waterAlertEl.style.borderColor = 'rgba(59, 130, 246, 0.2)';
-            waterAlertEl.querySelector('.alert-icon').style.color = 'var(--color-blue)';
-            waterAlertEl.querySelector('.alert-body h4').innerText = `Bạn còn thiếu ${waterRemain.toFixed(1)} lít nước hôm nay`;
-            waterAlertEl.querySelector('.alert-body p').innerText = `Tương đương khoảng ${Math.ceil(waterRemain / 0.25)} ly nước nữa. Hãy uống đều đặn nhé!`;
+            const alertIcon = waterAlertEl.querySelector('.alert-icon');
+            if (alertIcon) alertIcon.style.color = 'var(--color-blue)';
+            const alertH4 = waterAlertEl.querySelector('.alert-body h4');
+            if (alertH4) alertH4.innerText = `Bạn còn thiếu ${waterRemain.toFixed(1)} lít nước hôm nay`;
+            const alertP = waterAlertEl.querySelector('.alert-body p');
+            if (alertP) alertP.innerText = `Tương đương khoảng ${Math.ceil(waterRemain / 0.25)} ly nước nữa. Hãy uống đều đặn nhé!`;
         }
     }
 
     // Refresh history grids and lists
-    renderDisciplineCalendar();
-    renderWaterHistoryList();
-    renderDiaryMealsList();
+    if (typeof renderDisciplineCalendar === 'function') renderDisciplineCalendar();
+    if (typeof renderWaterHistoryList === 'function') renderWaterHistoryList();
+    if (typeof renderDiaryMealsList === 'function') renderDiaryMealsList();
 
     // Reinitialize icons rendered via template
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
+    
+    } catch (uiErr) {
+        console.warn("updateUI gặp lỗi (không ảnh hưởng dữ liệu):", uiErr);
+    }
 }
 
 // --- Render Water Log History ---
