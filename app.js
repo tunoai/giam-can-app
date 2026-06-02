@@ -1396,44 +1396,78 @@ function applyAIMenu(aiMenu) {
                 totalEl.innerText = `${sum} kcal`;
             }
             
-            // Fetch real food image based on AI keyword
+            // Generate food image with Gemini AI
             if (imgEl && mealData.imageKeyword) {
-                fetchFoodImage(mealData.imageKeyword, meal).then(url => {
-                    if (url) imgEl.style.backgroundImage = `url('${url}')`;
+                // Show loading state
+                imgEl.style.backgroundImage = 'none';
+                imgEl.style.display = 'flex';
+                imgEl.style.alignItems = 'center';
+                imgEl.style.justifyContent = 'center';
+                imgEl.style.background = 'linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%)';
+                imgEl.innerHTML = '<span class="spinner-small"></span>';
+                
+                generateFoodImage(mealData.imageKeyword).then(dataUrl => {
+                    imgEl.innerHTML = '';
+                    imgEl.style.display = '';
+                    imgEl.style.backgroundImage = `url('${dataUrl}')`;
+                    imgEl.style.background = '';
+                    imgEl.style.backgroundSize = 'cover';
+                    imgEl.style.backgroundPosition = 'center';
                 });
             }
         });
     });
 }
 
-// Fetch food image from free Pexels API
-async function fetchFoodImage(keyword, mealType) {
-    try {
-        const query = encodeURIComponent(keyword + ' food');
-        const response = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=5&orientation=landscape`, {
-            headers: { 'Authorization': 'qfBkF5v10na1FqzA8LV6w0B9bIVRHpKRNLHPaxCEsNfr0D3W1urNMYqf' }
-        });
-        
-        if (!response.ok) throw new Error('Pexels API failed');
-        
-        const data = await response.json();
-        if (data.photos && data.photos.length > 0) {
-            // Pick a random photo from results
-            const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
-            return photo.src.medium; // 350x233 size, good for cards
+// Generate food image using Gemini API (same API key)
+async function generateFoodImage(keyword) {
+    const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash-preview-image-generation'];
+    
+    const prompt = `Generate a beautiful, professional food photography image of: ${keyword}. 
+The image should look like a real photograph taken from above or at a 45-degree angle, with natural lighting, on a clean plate or wooden table. Make it look appetizing and high quality.`;
+
+    for (const modelName of MODELS) {
+        try {
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseModalities: ["IMAGE", "TEXT"]
+                    }
+                })
+            });
+            
+            if (!response.ok) continue;
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates[0]?.content?.parts) {
+                for (const part of result.candidates[0].content.parts) {
+                    if (part.inlineData) {
+                        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn(`Image gen with ${modelName} failed:`, err);
+            continue;
         }
-    } catch (err) {
-        console.warn('Failed to fetch food image:', err);
     }
     
     // Fallback to local images
     const fallbackMap = {
-        breakfast: 'healthy_breakfast.png',
-        lunch: 'healthy_lunch.png',
-        dinner: 'healthy_dinner.png',
-        snack: 'healthy_snack.png'
+        'breakfast': 'healthy_breakfast.png',
+        'lunch': 'healthy_lunch.png', 
+        'dinner': 'healthy_dinner.png',
+        'snack': 'healthy_snack.png'
     };
-    return fallbackMap[mealType] || 'healthy_salad.png';
+    const type = keyword.toLowerCase();
+    if (type.includes('breakfast') || type.includes('oat') || type.includes('egg')) return fallbackMap.breakfast;
+    if (type.includes('lunch') || type.includes('rice') || type.includes('chicken')) return fallbackMap.lunch;
+    if (type.includes('dinner') || type.includes('fish') || type.includes('salmon')) return fallbackMap.dinner;
+    return fallbackMap.snack;
 }
 
 function randomizeMenus() {
