@@ -751,6 +751,9 @@
                             <i data-lucide="upload-cloud"></i> Tải ảnh từ máy
                             <input type="file" id="library-upload-input" accept="image/*" class="hidden-file-input" style="display: none;">
                         </label>
+                        <button class="btn btn-outline-sm" id="btn-open-apikey-modal" style="display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 10px 18px; border-radius: 12px;">
+                            <i data-lucide="key"></i> Cài đặt API Key
+                        </button>
                     </div>
 
                     <div class="library-grid" id="library-grid-container">
@@ -1106,6 +1109,55 @@
             <div style="display: flex; gap: 12px;">
                 <button id="btn-confirm-cancel" class="btn btn-outline-sm" style="flex: 1;">Hủy</button>
                 <button id="btn-confirm-delete" class="btn btn-primary" style="flex: 1; background-color: #ef4444; border-color: #ef4444; color: white;">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Settings Modal -->
+    <div id="apikey-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 480px; border-radius: 20px; padding: 32px; position: relative;">
+            <button id="btn-close-apikey-modal" style="position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--text-light); padding: 4px;">
+                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+            </button>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="background: linear-gradient(135deg, #FF6B00, #FF8A3D); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 4px 12px rgba(255,107,0,0.3);">
+                    <i data-lucide="key" style="width: 28px; height: 28px; color: white;"></i>
+                </div>
+                <h3 style="font-size: 20px; margin-bottom: 4px;">Cài đặt Google Gemini API Key</h3>
+                <p style="color: var(--text-light); font-size: 14px;">Cần API Key để sử dụng tính năng phân tích ảnh bữa ăn bằng AI</p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div id="apikey-status" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-size: 14px; margin-bottom: 16px;"></div>
+                
+                <label for="apikey-input" style="font-size: 14px; font-weight: 600; display: block; margin-bottom: 8px; color: var(--text-color);">API Key</label>
+                <div style="position: relative;">
+                    <input type="password" id="apikey-input" placeholder="Dán API Key của bạn tại đây..." 
+                        style="width: 100%; padding: 14px 48px 14px 16px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s; box-sizing: border-box; font-family: 'Be Vietnam Pro', monospace;"
+                        onfocus="this.style.borderColor='#FF6B00'" onblur="this.style.borderColor='#e0e0e0'">
+                    <button id="btn-toggle-apikey" type="button" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-light); padding: 4px;">
+                        <i data-lucide="eye" style="width: 20px; height: 20px;"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <button id="btn-save-apikey" class="btn btn-primary" style="flex: 1; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600;">
+                    <i data-lucide="save" style="width: 18px; height: 18px;"></i> Lưu API Key
+                </button>
+                <button id="btn-delete-apikey" class="btn btn-outline-sm" style="padding: 14px 20px; border-radius: 12px; color: #ef4444; border-color: #ef4444;">
+                    <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+
+            <div style="background: #f8f9fa; border-radius: 12px; padding: 16px; font-size: 13px; color: var(--text-light); line-height: 1.6;">
+                <p style="margin-bottom: 8px;"><strong style="color: var(--text-color);">📌 Cách lấy API Key miễn phí:</strong></p>
+                <ol style="margin: 0; padding-left: 20px;">
+                    <li>Truy cập <a href="https://aistudio.google.com/apikey" target="_blank" style="color: #FF6B00; font-weight: 600; text-decoration: none;">Google AI Studio</a></li>
+                    <li>Đăng nhập tài khoản Google</li>
+                    <li>Nhấn <strong>"Create API Key"</strong></li>
+                    <li>Copy và dán key vào ô trên</li>
+                </ol>
             </div>
         </div>
     </div>

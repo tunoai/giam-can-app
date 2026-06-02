@@ -193,7 +193,6 @@ function loadState() {
                 if (state.user && state.user.name === "Nguyễn Mai") {
                     state.user.name = "Tùng Chu";
                     state.user.avatar = "tung_chu_avatar.png";
-                    db.ref('shared_state').set(state);
                 }
                 // Save lightweight state (no images) to localStorage
                 try {
@@ -210,31 +209,68 @@ function loadState() {
                     console.warn("Lỗi lưu localStorage:", e);
                 }
 
-                // Cache all images to IndexedDB for instant F5 reload
-                saveAllImagesToCache(state.library);
-                
-                updateUI();
-                try { if (weightChart) renderWeightChart(); } catch(e) {}
-                
-                // Always re-render library when Firebase data arrives
-                if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
+                // If Firebase still has images from before migration, cache them first
+                const hasFirebaseImages = state.library && state.library.some(item => item.img && item.img.length > 10);
+                const afterCacheReady = () => {
+                    // Now load images from IndexedDB cache for items that don't have images
+                    loadImagesFromCache(state.library).then(() => {
+                        updateUI();
+                        try { if (weightChart) renderWeightChart(); } catch(e) {}
+                        if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
 
-                const diaryScreen = document.getElementById('screen-thuc-don');
-                if (diaryScreen && !diaryScreen.classList.contains('hidden')) {
-                    const activeTab = document.querySelector('.day-tab.active');
-                    if (activeTab) {
-                        const dayText = activeTab.querySelector('strong').innerText;
-                        const dayKey = dayText.toLowerCase();
-                        if (typeof renderDiary === 'function') renderDiary(dayKey);
-                    }
+                        const diaryScreen = document.getElementById('screen-thuc-don');
+                        if (diaryScreen && !diaryScreen.classList.contains('hidden')) {
+                            const activeTab = document.querySelector('.day-tab.active');
+                            if (activeTab) {
+                                const dayText = activeTab.querySelector('strong').innerText;
+                                const dayKey = dayText.toLowerCase();
+                                if (typeof renderDiary === 'function') renderDiary(dayKey);
+                            }
+                        }
+                        
+                        // If Firebase had images, re-save to strip them out (migration)
+                        if (hasFirebaseImages) {
+                            saveStateToFirebase();
+                        }
+                        
+                        isSyncingFromFirebase = false;
+                    });
+                };
+
+                if (hasFirebaseImages) {
+                    // Save Firebase images to IndexedDB cache first, then proceed
+                    saveAllImagesToCache(state.library).then(afterCacheReady);
+                } else {
+                    afterCacheReady();
                 }
-                
-                isSyncingFromFirebase = false;
             } else {
                 if (!isSyncingFromFirebase) {
-                    db.ref('shared_state').set(state);
+                    saveStateToFirebase();
                 }
             }
+        });
+    }
+}
+
+// Helper: create lightweight state without images for storage
+function createLightState() {
+    const lightState = JSON.parse(JSON.stringify(state));
+    if (lightState.library && lightState.library.length > 0) {
+        lightState.library = lightState.library.map(item => {
+            const copy = Object.assign({}, item);
+            delete copy.img;
+            return copy;
+        });
+    }
+    return lightState;
+}
+
+// Helper: save state to Firebase without images
+function saveStateToFirebase() {
+    if (db && !isSyncingFromFirebase) {
+        const lightState = createLightState();
+        db.ref('shared_state').set(lightState).catch(err => {
+            console.error("Lỗi lưu Firebase:", err);
         });
     }
 }
@@ -242,14 +278,7 @@ function loadState() {
 function saveState() {
     // Save to localStorage WITHOUT base64 image data (to avoid 5MB limit)
     try {
-        const lightState = JSON.parse(JSON.stringify(state));
-        if (lightState.library && lightState.library.length > 0) {
-            lightState.library = lightState.library.map(item => {
-                const copy = Object.assign({}, item);
-                delete copy.img;
-                return copy;
-            });
-        }
+        const lightState = createLightState();
         localStorage.setItem('fitlife_state', JSON.stringify(lightState));
     } catch (e) {
         console.warn("Lỗi lưu localStorage:", e);
@@ -259,12 +288,8 @@ function saveState() {
     saveAllImagesToCache(state.library);
 
     updateUI();
-    // Save FULL state (with images) to Firebase cloud
-    if (db && !isSyncingFromFirebase) {
-        db.ref('shared_state').set(state).catch(err => {
-            console.error("Lỗi lưu Firebase:", err);
-        });
-    }
+    // Save lightweight state (no images) to Firebase to avoid size limits
+    saveStateToFirebase();
 }
 
 // --- Dynamic Date Formatting ---
@@ -1600,6 +1625,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ['initRecalculateTrigger', initRecalculateTrigger],
         ['initCheckInTriggers', initCheckInTriggers],
         ['initLibrary', initLibrary],
+        ['initApiKeyModal', initApiKeyModal],
     ];
     
     initModules.forEach(([name, fn]) => {
@@ -1673,10 +1699,10 @@ function compressExistingLibraryImages() {
     Promise.all(promises).then(() => {
         if (hasChanges) {
             try {
-                localStorage.setItem('fitlife_state', JSON.stringify(state));
-                if (typeof db !== 'undefined' && db && !isSyncingFromFirebase) {
-                    db.ref('shared_state').set(state).catch(e => console.error(e));
-                }
+                saveAllImagesToCache(state.library);
+                const lightState = createLightState();
+                localStorage.setItem('fitlife_state', JSON.stringify(lightState));
+                saveStateToFirebase();
                 console.log("Đã tự động nén các ảnh cũ, giải phóng bộ nhớ thành công!");
             } catch (e) {
                 console.error("Lỗi khi lưu ảnh đã nén", e);
@@ -1776,7 +1802,7 @@ function renderLibraryGrid() {
         const hasImage = imgSrc && imgSrc.length > 10;
         const imgTag = hasImage 
             ? `<img src="${imgSrc}" alt="${item.name || 'Ảnh món ăn'}">`
-            : `<div style="width:100%;height:180px;background:linear-gradient(135deg,#f0f0f0,#e0e0e0);display:flex;align-items:center;justify-content:center;color:#999;font-size:14px;"><i data-lucide="cloud-download" style="width:24px;height:24px;margin-right:8px;"></i> Đang tải từ đám mây...</div>`;
+            : `<div class="library-img-loading" data-item-id="${item.id}" style="width:100%;height:180px;background:linear-gradient(135deg,#f0f0f0,#e0e0e0);display:flex;align-items:center;justify-content:center;color:#999;font-size:14px;"><span class="spinner-small" style="margin-right:8px;"></span> Đang tải ảnh...</div>`;
 
         if (item.analyzed) {
             html += `
@@ -1821,6 +1847,29 @@ function renderLibraryGrid() {
 
     container.innerHTML = (emptyState ? emptyState.outerHTML : '') + html;
     if(window.lucide) window.lucide.createIcons();
+
+    // Retry loading missing images from IndexedDB cache
+    const loadingPlaceholders = container.querySelectorAll('.library-img-loading');
+    if (loadingPlaceholders.length > 0) {
+        loadingPlaceholders.forEach(placeholder => {
+            const itemId = placeholder.getAttribute('data-item-id');
+            if (itemId) {
+                getImageFromCache(itemId).then(cached => {
+                    if (cached) {
+                        const item = state.library.find(i => i.id === itemId);
+                        if (item) item.img = cached;
+                        const img = document.createElement('img');
+                        img.src = cached;
+                        img.alt = (item && item.name) || 'Ảnh món ăn';
+                        placeholder.replaceWith(img);
+                    } else {
+                        placeholder.innerHTML = '<i data-lucide="image-off" style="width:24px;height:24px;margin-right:8px;"></i> Ảnh không khả dụng';
+                        if(window.lucide) window.lucide.createIcons();
+                    }
+                });
+            }
+        });
+    }
 }
 
 window.analyzeLibraryImage = async function(id) {
@@ -1848,7 +1897,8 @@ window.analyzeLibraryImage = async function(id) {
         }
     } catch (err) {
         console.error("Lỗi khi phân tích:", err);
-        showNotification("Lỗi AI", "Không thể phân tích hình ảnh lúc này. Vui lòng thử lại sau.", "error");
+        const errMsg = err.message || "Không rõ lỗi";
+        showNotification("Lỗi AI", `${errMsg}`, "error");
         if (btn) {
             btn.innerHTML = '<i data-lucide="scan"></i> Phân tích AI';
             btn.classList.remove('loading');
@@ -1914,19 +1964,96 @@ window.replaceMealFromLibrary = function(day, mealType) {
 }
 
 let GEMINI_API_KEY = localStorage.getItem('gemini_api_key');
-if (!GEMINI_API_KEY || GEMINI_API_KEY === "null") {
-    GEMINI_API_KEY = prompt("Vui lòng nhập Google Gemini API Key của bạn để sử dụng tính năng phân tích AI:");
-    if (GEMINI_API_KEY) {
-        localStorage.setItem('gemini_api_key', GEMINI_API_KEY);
+if (GEMINI_API_KEY === "null") GEMINI_API_KEY = null;
+
+// --- API Key Modal Logic ---
+function initApiKeyModal() {
+    const modal = document.getElementById('apikey-modal');
+    const btnOpen = document.getElementById('btn-open-apikey-modal');
+    const btnClose = document.getElementById('btn-close-apikey-modal');
+    const btnSave = document.getElementById('btn-save-apikey');
+    const btnDelete = document.getElementById('btn-delete-apikey');
+    const btnToggle = document.getElementById('btn-toggle-apikey');
+    const input = document.getElementById('apikey-input');
+    const statusDiv = document.getElementById('apikey-status');
+
+    if (!modal || !btnOpen) return;
+
+    function updateStatus() {
+        if (GEMINI_API_KEY && GEMINI_API_KEY.length > 5) {
+            const masked = GEMINI_API_KEY.substring(0, 6) + '••••••••' + GEMINI_API_KEY.substring(GEMINI_API_KEY.length - 4);
+            statusDiv.innerHTML = `<i data-lucide="check-circle" style="width:18px;height:18px;color:#22c55e;"></i> <span style="color:#166534;"><strong>Đã cài đặt:</strong> ${masked}</span>`;
+            statusDiv.style.background = '#dcfce7';
+            input.value = GEMINI_API_KEY;
+        } else {
+            statusDiv.innerHTML = `<i data-lucide="alert-circle" style="width:18px;height:18px;color:#f59e0b;"></i> <span style="color:#92400e;"><strong>Chưa có API Key.</strong> Hãy nhập key để sử dụng tính năng AI.</span>`;
+            statusDiv.style.background = '#fef3c7';
+            input.value = '';
+        }
+        if (window.lucide) window.lucide.createIcons();
     }
+
+    function openModal() {
+        updateStatus();
+        input.type = 'password';
+        modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+    }
+
+    btnOpen.addEventListener('click', openModal);
+    btnClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    btnToggle.addEventListener('click', () => {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        const icon = btnToggle.querySelector('i');
+        if (icon) icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+        if (window.lucide) window.lucide.createIcons();
+    });
+
+    btnSave.addEventListener('click', () => {
+        const val = input.value.trim();
+        if (!val || val.length < 10) {
+            showNotification("Lỗi", "API Key không hợp lệ. Key phải có ít nhất 10 ký tự.", "error");
+            return;
+        }
+        GEMINI_API_KEY = val;
+        localStorage.setItem('gemini_api_key', val);
+        updateStatus();
+        showNotification("Thành công", "API Key đã được lưu thành công!", "success");
+        closeModal();
+    });
+
+    btnDelete.addEventListener('click', () => {
+        GEMINI_API_KEY = null;
+        localStorage.removeItem('gemini_api_key');
+        input.value = '';
+        updateStatus();
+        showNotification("Đã xóa", "API Key đã được xóa.", "warning");
+    });
+
+    // Expose open function globally so analyze can trigger it
+    window.openApiKeyModal = openModal;
 }
 
 async function analyzeImageWithGemini(base64Image) {
     if (!GEMINI_API_KEY) {
-        throw new Error("Missing Gemini API Key");
+        // Open modal instead of prompt
+        if (window.openApiKeyModal) {
+            window.openApiKeyModal();
+        }
+        throw new Error("Chưa có API Key. Vui lòng nhập API Key trong cài đặt để sử dụng tính năng này.");
     }
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
+    // Try models in order of preference
+    const MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash'];
+    
     let mimeType = "image/jpeg";
     let data = base64Image;
 
@@ -1974,37 +2101,68 @@ Bạn BẮT BUỘC trả về ĐÚNG MỘT ĐỐI TƯỢNG JSON thuần túy (kh
         }
     };
 
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-            throw new Error(`Lỗi HTTP: ${response.status}`);
-        }
-
-        const result = await response.json();
-        if (!result.candidates || result.candidates.length === 0) {
-            throw new Error("Gemini không trả về kết quả");
-        }
+    let lastError = null;
+    
+    for (const modelName of MODELS) {
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
         
-        let textResult = result.candidates[0].content.parts[0].text;
-        textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
+        try {
+            console.log(`Đang thử model: ${modelName}...`);
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
 
-        const parsedData = JSON.parse(textResult);
-        return {
-            name: parsedData.name || "Món ăn chưa xác định",
-            weight: parsedData.weight || 200,
-            kcal: parsedData.kcal || 300,
-            macros: parsedData.macros || {p: 0, c: 0, f: 0},
-            items: parsedData.items || []
-        };
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        throw error;
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMsg = errorData?.error?.message || `HTTP ${response.status}`;
+                console.warn(`Model ${modelName} lỗi: ${errorMsg}`);
+                
+                // If API key is invalid, don't try other models
+                if (response.status === 400 || response.status === 403) {
+                    if (errorMsg.toLowerCase().includes('api key') || errorMsg.toLowerCase().includes('permission')) {
+                        localStorage.removeItem('gemini_api_key');
+                        GEMINI_API_KEY = null;
+                        throw new Error(`API Key không hợp lệ: ${errorMsg}. Vui lòng reload trang và nhập lại API Key.`);
+                    }
+                }
+                
+                lastError = new Error(`Model ${modelName}: ${errorMsg}`);
+                continue; // Try next model
+            }
+
+            const result = await response.json();
+            if (!result.candidates || result.candidates.length === 0) {
+                lastError = new Error(`Model ${modelName}: Gemini không trả về kết quả`);
+                continue;
+            }
+            
+            let textResult = result.candidates[0].content.parts[0].text;
+            textResult = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
+
+            const parsedData = JSON.parse(textResult);
+            console.log(`Phân tích thành công với model: ${modelName}`);
+            return {
+                name: parsedData.name || "Món ăn chưa xác định",
+                weight: parsedData.weight || 200,
+                kcal: parsedData.kcal || 300,
+                macros: parsedData.macros || {p: 0, c: 0, f: 0},
+                items: parsedData.items || []
+            };
+        } catch (error) {
+            console.error(`Gemini API Error (${modelName}):`, error);
+            lastError = error;
+            // If it's a definitive error (bad key), throw immediately
+            if (error.message.includes('API Key không hợp lệ')) {
+                throw error;
+            }
+            continue; // Try next model
+        }
     }
+    
+    // All models failed
+    throw lastError || new Error("Không thể kết nối với Gemini API. Vui lòng kiểm tra kết nối mạng và API Key.");
 }
