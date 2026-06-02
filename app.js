@@ -1229,30 +1229,162 @@ function initManualFoodForm() {
     });
 }
 
-// --- Menu Generation simulation ---
+// --- Menu Generation with Gemini AI ---
 function initMenuGenerator() {
     const btnGen = document.getElementById('btn-generate-menu');
     if (!btnGen) return;
 
-    btnGen.addEventListener('click', () => {
-        if (confirm("Tạo thực đơn AI mới dựa trên calo mục tiêu của bạn? Mọi thực đơn 3 ngày cũ sẽ bị ghi đè.")) {
-            // Show dynamic loading simulation
-            btnGen.disabled = true;
-            btnGen.innerHTML = `<span class="spinner-small"></span> Đang phân tích chỉ số...`;
+    btnGen.addEventListener('click', async () => {
+        if (!confirm("Tạo thực đơn AI mới dựa trên calo mục tiêu của bạn? Mọi thực đơn 3 ngày cũ sẽ bị ghi đè.")) return;
 
-            setTimeout(() => {
-                btnGen.innerHTML = `<span class="spinner-small"></span> Lập lịch calo tối ưu...`;
-            }, 800);
+        btnGen.disabled = true;
+        btnGen.innerHTML = `<span class="spinner-small"></span> AI đang lên thực đơn...`;
 
+        // Check if API key exists
+        if (!GEMINI_API_KEY) {
+            btnGen.innerHTML = `<span class="spinner-small"></span> Chưa có API Key, dùng thực đơn mẫu...`;
             setTimeout(() => {
-                // Generate and randomize values slightly
                 randomizeMenus();
                 btnGen.disabled = false;
                 btnGen.innerHTML = `<i data-lucide="sparkles"></i> Tạo thực đơn mới`;
-                alert("Đã tạo thành công thực đơn AI 3 ngày mới phù hợp với mục tiêu giảm cân của bạn!");
+                if (window.lucide) window.lucide.createIcons();
+                showNotification("Thực đơn mẫu", "Đã tạo thực đơn mẫu. Nhập API Key để AI tạo thực đơn cá nhân hóa!", "warning");
                 updateUI();
-            }, 1800);
+            }, 800);
+            return;
         }
+
+        try {
+            const targetKcal = state.nutrition?.targetKcal || 1800;
+            const aiMenu = await generateMenuWithGemini(targetKcal);
+            
+            if (aiMenu && aiMenu.days && aiMenu.days.length >= 3) {
+                applyAIMenu(aiMenu);
+                showNotification("Thành công", "AI đã tạo thực đơn 3 ngày mới phù hợp với mục tiêu của bạn!", "success");
+            } else {
+                randomizeMenus();
+                showNotification("Thực đơn mẫu", "AI trả về dữ liệu không đủ, đã dùng thực đơn mẫu thay thế.", "warning");
+            }
+            updateUI();
+        } catch (err) {
+            console.error("Lỗi tạo thực đơn AI:", err);
+            randomizeMenus();
+            showNotification("Dùng thực đơn mẫu", `Lỗi AI: ${err.message}. Đã dùng thực đơn mẫu.`, "warning");
+            updateUI();
+        } finally {
+            btnGen.disabled = false;
+            btnGen.innerHTML = `<i data-lucide="sparkles"></i> Tạo thực đơn mới`;
+            if (window.lucide) window.lucide.createIcons();
+        }
+    });
+}
+
+async function generateMenuWithGemini(targetKcal) {
+    const MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash'];
+    
+    const prompt = `Bạn là chuyên gia dinh dưỡng Việt Nam. Hãy tạo thực đơn GIẢM CÂN 3 ngày với mục tiêu ${targetKcal} kcal/ngày.
+
+Yêu cầu:
+- Mỗi ngày có 4 bữa: breakfast (sáng), lunch (trưa), dinner (tối), snack (phụ)
+- Mỗi bữa có danh sách món ăn với tên Tiếng Việt, khối lượng (gram), calo
+- Tổng calo mỗi ngày xấp xỉ ${targetKcal} kcal
+- Món ăn phải là món Việt Nam phổ biến, dễ nấu, phù hợp giảm cân
+- Mỗi bữa có tên tổng quát mô tả ngắn
+
+Trả về JSON thuần túy (KHÔNG bọc markdown):
+{
+  "days": [
+    {
+      "day": 1,
+      "breakfast": {
+        "title": "Tên bữa sáng",
+        "items": [{"name": "Tên món", "weight": gram, "kcal": số}]
+      },
+      "lunch": {
+        "title": "Tên bữa trưa", 
+        "items": [{"name": "Tên món", "weight": gram, "kcal": số}]
+      },
+      "dinner": {
+        "title": "Tên bữa tối",
+        "items": [{"name": "Tên món", "weight": gram, "kcal": số}]
+      },
+      "snack": {
+        "title": "Tên bữa phụ",
+        "items": [{"name": "Tên món", "weight": gram, "kcal": số}]
+      }
+    }
+  ]
+}`;
+
+    const requestBody = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+            temperature: 0.8,
+            responseMimeType: "application/json"
+        }
+    };
+
+    for (const modelName of MODELS) {
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            if (!response.ok) continue;
+            const result = await response.json();
+            if (!result.candidates || result.candidates.length === 0) continue;
+            let text = result.candidates[0].content.parts[0].text;
+            text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(text);
+        } catch (e) {
+            console.warn(`Model ${modelName} failed:`, e);
+            continue;
+        }
+    }
+    throw new Error("Không thể kết nối Gemini API");
+}
+
+function applyAIMenu(aiMenu) {
+    const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+    
+    aiMenu.days.forEach((day, idx) => {
+        const dayNum = idx + 1;
+        if (dayNum > 3) return;
+        
+        mealTypes.forEach(meal => {
+            const mealData = day[meal];
+            if (!mealData || !mealData.items) return;
+            
+            const listEl = document.getElementById(`day${dayNum}-${meal}-list`);
+            const totalEl = document.getElementById(`day${dayNum}-${meal}-total`);
+            const imgEl = document.getElementById(`day${dayNum}-${meal}-img`);
+            
+            if (listEl) {
+                listEl.innerHTML = mealData.items.map(item => 
+                    `<li><span>${item.name}</span><strong>${item.weight}g • ${item.kcal} kcal</strong></li>`
+                ).join('');
+            }
+            
+            if (totalEl) {
+                const sum = mealData.items.reduce((acc, i) => acc + (i.kcal || 0), 0);
+                totalEl.innerText = `${sum} kcal`;
+            }
+            
+            // Use existing food images based on meal type
+            if (imgEl) {
+                const imgMap = {
+                    breakfast: ['healthy_breakfast.png', 'pho_ga.png', 'banh_mi_den.png', 'yen_mach.png'],
+                    lunch: ['healthy_lunch.png', 'ca_thu.png', 'thit_heo.png'],
+                    dinner: ['healthy_dinner.png', 'tom_ram.png', 'bo_ap_chao.png'],
+                    snack: ['healthy_snack.png', 'qua_bo.png', 'hat_macca.png', 'sinh_to_dau.png']
+                };
+                const imgs = imgMap[meal] || ['healthy_salad.png'];
+                const randomImg = imgs[Math.floor(Math.random() * imgs.length)];
+                imgEl.style.backgroundImage = `url('${randomImg}')`;
+            }
+        });
     });
 }
 
@@ -1966,80 +2098,119 @@ window.replaceMealFromLibrary = function(day, mealType) {
 let GEMINI_API_KEY = localStorage.getItem('gemini_api_key');
 if (GEMINI_API_KEY === "null") GEMINI_API_KEY = null;
 
-// --- API Key Modal Logic ---
+// --- API Key Sidebar + Modal Logic ---
 function initApiKeyModal() {
+    // Sidebar elements
+    const sidebarInput = document.getElementById('sidebar-apikey-input');
+    const sidebarSaveBtn = document.getElementById('sidebar-apikey-save');
+    const sidebarStatus = document.getElementById('sidebar-apikey-status');
+    
+    // Modal elements (kept as secondary)
     const modal = document.getElementById('apikey-modal');
-    const btnOpen = document.getElementById('btn-open-apikey-modal');
     const btnClose = document.getElementById('btn-close-apikey-modal');
     const btnSave = document.getElementById('btn-save-apikey');
     const btnDelete = document.getElementById('btn-delete-apikey');
     const btnToggle = document.getElementById('btn-toggle-apikey');
-    const input = document.getElementById('apikey-input');
+    const modalInput = document.getElementById('apikey-input');
     const statusDiv = document.getElementById('apikey-status');
 
-    if (!modal || !btnOpen) return;
-
-    function updateStatus() {
-        if (GEMINI_API_KEY && GEMINI_API_KEY.length > 5) {
-            const masked = GEMINI_API_KEY.substring(0, 6) + '••••••••' + GEMINI_API_KEY.substring(GEMINI_API_KEY.length - 4);
-            statusDiv.innerHTML = `<i data-lucide="check-circle" style="width:18px;height:18px;color:#22c55e;"></i> <span style="color:#166534;"><strong>Đã cài đặt:</strong> ${masked}</span>`;
-            statusDiv.style.background = '#dcfce7';
-            input.value = GEMINI_API_KEY;
-        } else {
-            statusDiv.innerHTML = `<i data-lucide="alert-circle" style="width:18px;height:18px;color:#f59e0b;"></i> <span style="color:#92400e;"><strong>Chưa có API Key.</strong> Hãy nhập key để sử dụng tính năng AI.</span>`;
-            statusDiv.style.background = '#fef3c7';
-            input.value = '';
+    function updateAllStatus() {
+        // Update sidebar status
+        if (sidebarStatus) {
+            if (GEMINI_API_KEY && GEMINI_API_KEY.length > 5) {
+                const masked = '••••' + GEMINI_API_KEY.substring(GEMINI_API_KEY.length - 4);
+                sidebarStatus.innerHTML = `<span class="apikey-dot apikey-dot-active"></span><span>Đã kết nối (${masked})</span>`;
+                if (sidebarInput) sidebarInput.value = GEMINI_API_KEY;
+            } else {
+                sidebarStatus.innerHTML = `<span class="apikey-dot apikey-dot-inactive"></span><span>Chưa cài đặt</span>`;
+                if (sidebarInput) sidebarInput.value = '';
+            }
+        }
+        
+        // Update modal status
+        if (statusDiv) {
+            if (GEMINI_API_KEY && GEMINI_API_KEY.length > 5) {
+                const masked = GEMINI_API_KEY.substring(0, 6) + '••••••••' + GEMINI_API_KEY.substring(GEMINI_API_KEY.length - 4);
+                statusDiv.innerHTML = `<i data-lucide="check-circle" style="width:18px;height:18px;color:#22c55e;"></i> <span style="color:#166534;"><strong>Đã cài đặt:</strong> ${masked}</span>`;
+                statusDiv.style.background = '#dcfce7';
+                if (modalInput) modalInput.value = GEMINI_API_KEY;
+            } else {
+                statusDiv.innerHTML = `<i data-lucide="alert-circle" style="width:18px;height:18px;color:#f59e0b;"></i> <span style="color:#92400e;"><strong>Chưa có API Key.</strong> Hãy nhập key để sử dụng tính năng AI.</span>`;
+                statusDiv.style.background = '#fef3c7';
+                if (modalInput) modalInput.value = '';
+            }
         }
         if (window.lucide) window.lucide.createIcons();
     }
 
+    function saveKey(val) {
+        if (!val || val.trim().length < 10) {
+            showNotification("Lỗi", "API Key không hợp lệ. Key phải có ít nhất 10 ký tự.", "error");
+            return false;
+        }
+        GEMINI_API_KEY = val.trim();
+        localStorage.setItem('gemini_api_key', GEMINI_API_KEY);
+        updateAllStatus();
+        showNotification("Thành công", "API Key đã được lưu thành công!", "success");
+        return true;
+    }
+
+    // --- Sidebar handlers ---
+    if (sidebarSaveBtn && sidebarInput) {
+        sidebarSaveBtn.addEventListener('click', () => {
+            saveKey(sidebarInput.value);
+        });
+        sidebarInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') saveKey(sidebarInput.value);
+        });
+    }
+
+    // --- Modal handlers ---
     function openModal() {
-        updateStatus();
-        input.type = 'password';
-        modal.classList.remove('hidden');
+        updateAllStatus();
+        if (modalInput) modalInput.type = 'password';
+        if (modal) modal.classList.remove('hidden');
     }
 
     function closeModal() {
-        modal.classList.add('hidden');
+        if (modal) modal.classList.add('hidden');
     }
 
-    btnOpen.addEventListener('click', openModal);
-    btnClose.addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => {
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (modal) modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
 
-    btnToggle.addEventListener('click', () => {
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-        const icon = btnToggle.querySelector('i');
-        if (icon) icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
-        if (window.lucide) window.lucide.createIcons();
-    });
+    if (btnToggle && modalInput) {
+        btnToggle.addEventListener('click', () => {
+            const isPassword = modalInput.type === 'password';
+            modalInput.type = isPassword ? 'text' : 'password';
+            const icon = btnToggle.querySelector('i');
+            if (icon) icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+            if (window.lucide) window.lucide.createIcons();
+        });
+    }
 
-    btnSave.addEventListener('click', () => {
-        const val = input.value.trim();
-        if (!val || val.length < 10) {
-            showNotification("Lỗi", "API Key không hợp lệ. Key phải có ít nhất 10 ký tự.", "error");
-            return;
-        }
-        GEMINI_API_KEY = val;
-        localStorage.setItem('gemini_api_key', val);
-        updateStatus();
-        showNotification("Thành công", "API Key đã được lưu thành công!", "success");
-        closeModal();
-    });
+    if (btnSave && modalInput) {
+        btnSave.addEventListener('click', () => {
+            if (saveKey(modalInput.value)) closeModal();
+        });
+    }
 
-    btnDelete.addEventListener('click', () => {
-        GEMINI_API_KEY = null;
-        localStorage.removeItem('gemini_api_key');
-        input.value = '';
-        updateStatus();
-        showNotification("Đã xóa", "API Key đã được xóa.", "warning");
-    });
+    if (btnDelete) {
+        btnDelete.addEventListener('click', () => {
+            GEMINI_API_KEY = null;
+            localStorage.removeItem('gemini_api_key');
+            updateAllStatus();
+            showNotification("Đã xóa", "API Key đã được xóa.", "warning");
+        });
+    }
 
-    // Expose open function globally so analyze can trigger it
+    // Expose open function globally
     window.openApiKeyModal = openModal;
+    
+    // Initial status update
+    updateAllStatus();
 }
 
 async function analyzeImageWithGemini(base64Image) {

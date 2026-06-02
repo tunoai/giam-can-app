@@ -59,6 +59,27 @@
                 </a>
             </nav>
 
+            <!-- API Key Settings in Sidebar -->
+            <div class="sidebar-apikey" id="sidebar-apikey-section">
+                <div class="sidebar-apikey-header">
+                    <i data-lucide="key" style="width:16px;height:16px;"></i>
+                    <span>Gemini API Key</span>
+                </div>
+                <div class="sidebar-apikey-status" id="sidebar-apikey-status">
+                    <span class="apikey-dot apikey-dot-inactive"></span>
+                    <span>Chưa cài đặt</span>
+                </div>
+                <div class="sidebar-apikey-input-wrap">
+                    <input type="password" id="sidebar-apikey-input" placeholder="Dán API Key..." class="sidebar-apikey-input">
+                    <button id="sidebar-apikey-save" class="sidebar-apikey-btn" title="Lưu">
+                        <i data-lucide="check" style="width:14px;height:14px;"></i>
+                    </button>
+                </div>
+                <a href="https://aistudio.google.com/apikey" target="_blank" class="sidebar-apikey-link">
+                    <i data-lucide="external-link" style="width:12px;height:12px;"></i> Lấy API Key miễn phí
+                </a>
+            </div>
+
             <!-- Profile Info -->
             <div class="sidebar-profile">
                 <img src="tung_chu_avatar.png" alt="Tùng Chu Avatar" class="profile-avatar" id="user-avatar-img" onerror="this.src='nguyen_mai_avatar.png'">
@@ -751,9 +772,7 @@
                             <i data-lucide="upload-cloud"></i> Tải ảnh từ máy
                             <input type="file" id="library-upload-input" accept="image/*" class="hidden-file-input" style="display: none;">
                         </label>
-                        <button class="btn btn-outline-sm" id="btn-open-apikey-modal" style="display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 10px 18px; border-radius: 12px;">
-                            <i data-lucide="key"></i> Cài đặt API Key
-                        </button>
+
                     </div>
 
                     <div class="library-grid" id="library-grid-container">
