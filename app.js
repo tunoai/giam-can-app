@@ -169,12 +169,22 @@ function loadState() {
 }
 
 function saveState() {
+    // Save to localStorage WITHOUT base64 image data (to avoid 5MB limit)
     try {
-        localStorage.setItem('fitlife_state', JSON.stringify(state));
+        const lightState = JSON.parse(JSON.stringify(state));
+        if (lightState.library && lightState.library.length > 0) {
+            lightState.library = lightState.library.map(item => {
+                const copy = Object.assign({}, item);
+                delete copy.img; // Remove heavy base64 image data
+                return copy;
+            });
+        }
+        localStorage.setItem('fitlife_state', JSON.stringify(lightState));
     } catch (e) {
-        console.warn("Lỗi lưu localStorage (có thể đầy bộ nhớ):", e);
+        console.warn("Lỗi lưu localStorage:", e);
     }
     updateUI();
+    // Save FULL state (with images) to Firebase cloud
     if (db && !isSyncingFromFirebase) {
         db.ref('shared_state').set(state).catch(err => {
             console.error("Lỗi lưu Firebase:", err);
@@ -1562,32 +1572,32 @@ function initLibrary() {
                 reader.onload = (event) => {
                     const img = new Image();
                     img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const MAX_SIZE = 800; // Giảm kích thước tối đa xuống 800px
-
-                        if (width > height) {
-                            if (width > MAX_SIZE) {
-                                height *= MAX_SIZE / width;
-                                width = MAX_SIZE;
-                            }
-                        } else {
-                            if (height > MAX_SIZE) {
-                                width *= MAX_SIZE / height;
-                                height = MAX_SIZE;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Nén ảnh sang định dạng JPEG chất lượng 70%
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-
                         try {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            const MAX_SIZE = 600; // Giảm xuống 600px để ảnh nhẹ hơn nữa
+
+                            if (width > height) {
+                                if (width > MAX_SIZE) {
+                                    height *= MAX_SIZE / width;
+                                    width = MAX_SIZE;
+                                }
+                            } else {
+                                if (height > MAX_SIZE) {
+                                    width *= MAX_SIZE / height;
+                                    height = MAX_SIZE;
+                                }
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            // Nén ảnh sang JPEG chất lượng 60%
+                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
                             const newItem = {
                                 id: Date.now().toString(),
                                 img: compressedBase64,
@@ -1600,17 +1610,20 @@ function initLibrary() {
                             saveState();
                             renderLibraryGrid();
                             uploadInput.value = '';
+                            showNotification("Thành công", "Ảnh đã được tải lên thư viện!", "success");
                         } catch (err) {
-                            console.error(err);
-                            state.library.pop(); // Xóa ảnh vừa thêm nếu lưu lỗi
-                            if (err.name === 'QuotaExceededError' || (err.message && err.message.includes('quota'))) {
-                                showNotification("Lỗi dung lượng", "Dù đã nén nhưng bộ nhớ vẫn đầy. Bạn hãy xóa bớt các ảnh cũ trong thư viện nhé.", "error");
-                            } else {
-                                showNotification("Lỗi", "Đã có lỗi xảy ra khi xử lý ảnh.", "error");
-                            }
+                            console.error("Lỗi upload ảnh:", err);
+                            state.library.pop();
+                            showNotification("Lỗi", "Lỗi khi xử lý ảnh: " + (err.message || err), "error");
                         }
                     };
+                    img.onerror = () => {
+                        showNotification("Lỗi", "Không thể đọc file ảnh này. Hãy thử ảnh khác.", "error");
+                    };
                     img.src = event.target.result;
+                };
+                reader.onerror = () => {
+                    showNotification("Lỗi", "Không thể đọc file. Hãy thử lại.", "error");
                 };
                 reader.readAsDataURL(file);
             }
