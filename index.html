@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitLife - Trung tâm Giảm cân & Quản lý Ăn uống AI</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="app-sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <i data-lucide="apple" class="logo-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <h2>FitLife</h2>
+                    <span>Giảm cân khoa học</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" data-target="dashboard" id="nav-dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="#" class="menu-item" data-target="thuc-don" id="nav-thuc-don">
+                    <i data-lucide="utensils"></i>
+                    <span>Thực đơn gợi ý</span>
+                </a>
+                <a href="#" class="menu-item" data-target="thu-vien" id="nav-thu-vien">
+                    <i data-lucide="library"></i>
+                    <span>Thư viện bữa ăn</span>
+                </a>
+                <a href="#" class="menu-item" data-target="nhat-ky" id="nav-nhat-ky">
+                    <i data-lucide="scan"></i>
+                    <span>Nhận diện bữa ăn</span>
+                </a>
+                <a href="#" class="menu-item" data-target="nuoc" id="nav-nuoc">
+                    <i data-lucide="droplet"></i>
+                    <span>Theo dõi nước</span>
+                </a>
+                <a href="#" class="menu-item" data-target="ky-luat" id="nav-ky-luat">
+                    <i data-lucide="shield-alert"></i>
+                    <span>Cảnh báo kỷ luật</span>
+                </a>
+            </nav>
+
+            <!-- Profile Info -->
+            <div class="sidebar-profile">
+                <img src="nguyen_mai_avatar.png" alt="Nguyễn Mai Avatar" class="profile-avatar" id="user-avatar-img">
+                <div class="profile-info">
+                    <h4 class="profile-name">Nguyễn Mai</h4>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="main-header">
+                <div class="header-welcome">
+                    <h1 id="header-greeting">Xin chào, Nguyễn Mai! 👋</h1>
+                    <p>Cùng nhau chinh phục mục tiêu của bạn!</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-sync" id="btn-sync-data">
+                        <i data-lucide="refresh-cw"></i>
+                        <span>Đồng bộ dữ liệu</span>
+                    </button>
+                    <div class="notification-bell" id="btn-notifications">
+                        <i data-lucide="bell"></i>
+                        <span class="bell-badge">2</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SCREENS CONTAINER -->
+            <div class="screens-container">
+                
+                <!-- 1. DASHBOARD SCREEN -->
+                <section class="screen-section active" id="screen-dashboard">
+                    <!-- Title Banner -->
+                    <div class="screen-header">
+                        <h2>Trung tâm giảm cân</h2>
+                        <span class="date-badge" id="dashboard-date">Hôm nay, 02/06/2026</span>
+                    </div>
+
+                    <!-- Stats Cards Row -->
+                    <div class="stats-grid">
+                        <div class="stat-card" id="card-weight-current">
+                            <div class="stat-icon icon-orange">
+                                <i data-lucide="scale"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Cân nặng hiện tại</span>
+                                <div class="stat-value-group">
+                                    <h3 class="stat-value" id="val-weight-current">82.3</h3>
+                                    <span class="stat-unit">kg</span>
+                                </div>
+                                <span class="stat-subtext" id="val-weight-update-time">Cập nhật: Hôm nay</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" id="card-weight-target">
+                            <div class="stat-icon icon-red">
+                                <i data-lucide="target"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Cân nặng mục tiêu</span>
+                                <div class="stat-value-group">
+                                    <h3 class="stat-value" id="val-weight-target">75.0</h3>
+                                    <span class="stat-unit">kg</span>
+                                </div>
+                                <span class="stat-subtext">Mục tiêu đến 30/09/2026</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" id="card-weight-lost">
+                            <div class="stat-icon icon-green">
+                                <i data-lucide="trending-down"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Đã giảm</span>
+                                <div class="stat-value-group text-green">
+                                    <h3 class="stat-value" id="val-weight-lost">2.7</h3>
+                                    <span class="stat-unit">kg</span>
+                                </div>
+                                <span class="stat-subtext" id="val-weight-start">Từ 85.0 kg</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" id="card-streak">
+                            <div class="stat-icon icon-orange-dark animate-pulse">
+                                <i data-lucide="flame"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Chuỗi check-in</span>
+                                <div class="stat-value-group">
+                                    <h3 class="stat-value" id="val-streak">18</h3>
+                                    <span class="stat-unit">ngày</span>
+                                </div>
+                                <span class="stat-subtext">Liên tục 🔥</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card" id="card-compliance">
+                            <div class="stat-icon icon-blue">
+                                <i data-lucide="award"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Điểm tuân thủ tuần</span>
+                                <div class="stat-value-group">
+                                    <h3 class="stat-value" id="val-compliance">92</h3>
+                                    <span class="stat-unit">%</span>
+                                </div>
+                                <span class="stat-subtext">Xuất sắc! 🎉</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Middle Interactive Grid -->
+                    <div class="dashboard-middle-grid">
+                        <!-- Weight Chart Card -->
+                        <div class="grid-card chart-card">
+                            <div class="card-header">
+                                <h3>Biểu đồ cân nặng</h3>
+                                <div class="card-actions">
+                                    <select class="select-input" id="chart-range-select">
+                                        <option value="30">30 ngày qua</option>
+                                        <option value="7">7 ngày qua</option>
+                                    </select>
+                                    <button class="btn btn-outline-sm" id="btn-add-weight-log">
+                                        <i data-lucide="plus"></i> Ghi cân nặng
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="weightHistoryChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Motivation Streak Banner -->
+                        <div class="streak-banner-card">
+                            <div class="streak-banner-content">
+                                <div class="trophy-circle">
+                                    <i data-lucide="trophy"></i>
+                                </div>
+                                <h2>Bạn đã duy trì mục tiêu được <span id="banner-streak-days">18</span> ngày liên tục!</h2>
+                                <p>Thật tuyệt vời! Hãy tiếp tục phát huy kỷ luật ăn uống lành mạnh nhé!</p>
+                            </div>
+                            <div class="streak-banner-decor"></div>
+                        </div>
+
+                        <!-- Today Calorie Overview -->
+                        <div class="grid-card calorie-overview-card">
+                            <div class="card-header">
+                                <h3>Tổng quan hôm nay</h3>
+                            </div>
+                            <div class="calorie-summary-body">
+                                <div class="calorie-ring-container">
+                                    <div class="calorie-ring-progress">
+                                        <!-- Animated Circle SVG -->
+                                        <svg width="150" height="150" viewBox="0 0 150 150">
+                                            <circle cx="75" cy="75" r="60" class="ring-bg"></circle>
+                                            <circle cx="75" cy="75" r="60" class="ring-fg" id="calorie-progress-ring" stroke-dasharray="377" stroke-dashoffset="94"></circle>
+                                        </svg>
+                                        <div class="ring-text">
+                                            <span class="consumed-value" id="dash-kcal-consumed">1,350</span>
+                                            <span class="consumed-target">/ <span id="dash-kcal-target">1,800</span></span>
+                                            <span class="consumed-unit">kcal</span>
+                                        </div>
+                                    </div>
+                                    <div class="calorie-remain">
+                                        <span>Calo còn lại:</span>
+                                        <strong id="dash-kcal-remain" class="text-green">450 kcal</strong>
+                                    </div>
+                                </div>
+                                <div class="macros-list">
+                                    <div class="macro-item">
+                                        <div class="macro-label-group">
+                                            <span class="macro-name">Protein</span>
+                                            <span class="macro-val"><span id="dash-protein-curr">95</span>g / <span id="dash-protein-target">140</span>g</span>
+                                        </div>
+                                        <div class="progress-bar-bg">
+                                            <div class="progress-bar-fg bar-protein" id="dash-protein-bar" style="width: 68%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="macro-item">
+                                        <div class="macro-label-group">
+                                            <span class="macro-name">Carb</span>
+                                            <span class="macro-val"><span id="dash-carb-curr">130</span>g / <span id="dash-carb-target">180</span>g</span>
+                                        </div>
+                                        <div class="progress-bar-bg">
+                                            <div class="progress-bar-fg bar-carb" id="dash-carb-bar" style="width: 72%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="macro-item">
+                                        <div class="macro-label-group">
+                                            <span class="macro-name">Fat</span>
+                                            <span class="macro-val"><span id="dash-fat-curr">40</span>g / <span id="dash-fat-target">60</span>g</span>
+                                        </div>
+                                        <div class="progress-bar-bg">
+                                            <div class="progress-bar-fg bar-fat" id="dash-fat-bar" style="width: 66%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Low Grid Previews -->
+                    <div class="dashboard-low-grid">
+                        <!-- Meal Plan Box -->
+                        <div class="preview-card-item" id="preview-dinh-duong">
+                            <div class="preview-header">
+                                <h3>Kế hoạch calo/macros</h3>
+                                <a href="#" class="preview-link" data-link="thuc-don">Xem chi tiết <i data-lucide="chevron-right"></i></a>
+                            </div>
+                            <div class="preview-content-centered">
+                                <div class="mini-macro-circle">
+                                    <svg width="100" height="100" viewBox="0 0 100 100">
+                                        <!-- Pie-like representation of 1800kcal -->
+                                        <circle cx="50" cy="50" r="40" stroke="#f0f0f0" stroke-width="12" fill="none"></circle>
+                                        <circle cx="50" cy="50" r="40" stroke="#FF6B00" stroke-width="12" stroke-dasharray="251" stroke-dashoffset="60" fill="none"></circle>
+                                    </svg>
+                                    <div class="mini-circle-text">
+                                        <strong>1.800</strong>
+                                        <span>kcal</span>
+                                    </div>
+                                </div>
+                                <p class="text-sub">Mục tiêu mỗi ngày</p>
+                                <button class="btn btn-light-sm w-full" id="btn-adjust-target-prev">Điều chỉnh mục tiêu</button>
+                            </div>
+                        </div>
+
+                        <!-- Gram Menu Box -->
+                        <div class="preview-card-item" id="preview-thuc-don">
+                            <div class="preview-header">
+                                <h3>Thực đơn theo gam</h3>
+                                <a href="#" class="preview-link" data-link="thuc-don">Xem thêm <i data-lucide="chevron-right"></i></a>
+                            </div>
+                            <div class="gram-meal-list">
+                                <span class="meal-time-tag">Bữa trưa</span>
+                                <div class="gram-meal-item">
+                                    <div class="meal-img-placeholder"><i data-lucide="drumstick"></i></div>
+                                    <div class="meal-info">
+                                        <span class="meal-title">Ức gà nướng</span>
+                                        <span class="meal-sub">150g • 250 kcal</span>
+                                    </div>
+                                </div>
+                                <div class="gram-meal-item">
+                                    <div class="meal-img-placeholder"><i data-lucide="cookie"></i></div>
+                                    <div class="meal-info">
+                                        <span class="meal-title">Cơm gạo lứt</span>
+                                        <span class="meal-sub">150g • 165 kcal</span>
+                                    </div>
+                                </div>
+                                <div class="gram-meal-item">
+                                    <div class="meal-img-placeholder"><i data-lucide="leaf"></i></div>
+                                    <div class="meal-info">
+                                        <span class="meal-title">Rau luộc</span>
+                                        <span class="meal-sub">200g • 60 kcal</span>
+                                    </div>
+                                </div>
+                                <div class="gram-meal-item">
+                                    <div class="meal-img-placeholder"><i data-lucide="soup"></i></div>
+                                    <div class="meal-info">
+                                        <span class="meal-title">Canh bí đỏ</span>
+                                        <span class="meal-sub">200g • 80 kcal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-light-sm w-full mt-auto" id="btn-view-all-meals-prev">Xem thực đơn đầy đủ</button>
+                        </div>
+
+                        <!-- Food Diary Box -->
+                        <div class="preview-card-item" id="preview-nhat-ky">
+                            <div class="preview-header">
+                                <h3>Nhật ký ăn uống</h3>
+                                <a href="#" class="preview-link" data-link="nhat-ky">Xem thêm <i data-lucide="chevron-right"></i></a>
+                            </div>
+                            <div class="preview-diary-summary">
+                                <p class="kcal-status-text">Calo đã nạp: <strong>1.350 / 1.800 kcal</strong></p>
+                                <ul class="diary-check-list" id="dash-diary-list">
+                                    <li>
+                                        <div class="custom-checkbox checked"><i data-lucide="check"></i></div>
+                                        <span>Bữa sáng</span>
+                                        <span class="kcal-badge">350 kcal</span>
+                                    </li>
+                                    <li>
+                                        <div class="custom-checkbox checked"><i data-lucide="check"></i></div>
+                                        <span>Bữa trưa</span>
+                                        <span class="kcal-badge">500 kcal</span>
+                                    </li>
+                                    <li>
+                                        <div class="custom-checkbox"><i data-lucide="check"></i></div>
+                                        <span>Bữa tối</span>
+                                        <span class="kcal-badge">400 kcal</span>
+                                    </li>
+                                    <li>
+                                        <div class="custom-checkbox checked"><i data-lucide="check"></i></div>
+                                        <span>Bữa phụ</span>
+                                        <span class="kcal-badge">100 kcal</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-light-sm w-full mt-auto" id="btn-add-food-prev">
+                                <i data-lucide="plus"></i> Thêm món ăn
+                            </button>
+                        </div>
+
+                        <!-- Water Tracker Box -->
+                        <div class="preview-card-item" id="preview-nuoc">
+                            <div class="preview-header">
+                                <h3>Theo dõi nước</h3>
+                                <a href="#" class="preview-link" data-link="nuoc">Xem chi tiết <i data-lucide="chevron-right"></i></a>
+                            </div>
+                            <div class="preview-water-body">
+                                <div class="water-glass-mini">
+                                    <div class="mini-water-wave" style="height: 60%;"></div>
+                                    <i data-lucide="droplet" class="mini-water-icon"></i>
+                                </div>
+                                <div class="water-stat">
+                                    <h4><span id="dash-water-volume">1.5</span> / 2.5 lít</h4>
+                                    <p>Bạn còn thiếu <span id="dash-water-remain">1.0</span> lít nước</p>
+                                </div>
+                            </div>
+                            <div class="water-quick-buttons">
+                                <button class="btn btn-water-action" id="prev-add-water-1"><i data-lucide="plus"></i>1 Ly nước</button>
+                                <button class="btn btn-coffee-action" id="prev-add-coffee-1"><i data-lucide="plus"></i>1 Cà phê</button>
+                                <button class="btn btn-tea-action" id="prev-add-tea-1"><i data-lucide="plus"></i>1 Trà</button>
+                            </div>
+                        </div>
+
+                        <!-- Alert Box -->
+                        <div class="preview-card-item flex-col justify-between" id="preview-canh-bao">
+                            <div class="preview-header">
+                                <h3>Cảnh báo không check-in</h3>
+                            </div>
+                            <div class="warning-box-body">
+                                <div class="warning-icon-large text-orange">
+                                    <i data-lucide="alert-triangle"></i>
+                                </div>
+                                <h4 class="warning-title text-orange" id="dash-warning-status">Bạn chưa check-in hôm nay!</h4>
+                                <p class="warning-desc">Hãy cập nhật dữ liệu để không bị gián đoạn chuỗi mục tiêu giảm cân.</p>
+                            </div>
+                            <button class="btn btn-primary w-full" id="btn-checkin-now-prev">Check-in ngay</button>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Streak and Tip Row -->
+                    <div class="dashboard-bottom-grid">
+                        <!-- 30-day Contribution Calendar -->
+                        <div class="grid-card checkin-calendar-card">
+                            <div class="card-header">
+                                <h3>Lịch check-in 30 ngày qua</h3>
+                                <div class="calendar-legends">
+                                    <span class="legend"><span class="dot dot-green"></span> Đã check-in</span>
+                                    <span class="legend"><span class="dot dot-orange"></span> Chưa check-in</span>
+                                    <span class="legend"><span class="dot dot-grey"></span> Bỏ lỡ</span>
+                                </div>
+                            </div>
+                            <div class="streak-grid-wrapper">
+                                <div class="streak-days-row" id="streak-grid-container">
+                                    <!-- Populated dynamically via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tip Card -->
+                        <div class="grid-card tip-card">
+                            <div class="tip-header">
+                                <i data-lucide="lightbulb" class="tip-icon"></i>
+                                <h3>Mẹo giảm cân hôm nay</h3>
+                            </div>
+                            <p class="tip-text">Uống một cốc nước lọc ấm vào buổi sáng ngay khi thức dậy giúp kích hoạt hệ tiêu hóa và thúc đẩy trao đổi chất.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. 3-DAY MENU SCREEN -->
+                <section class="screen-section" id="screen-thuc-don">
+                    <div class="screen-header">
+                        <h2>Thực đơn AI</h2>
+                        <button class="btn btn-primary" id="btn-generate-menu">
+                            <i data-lucide="sparkles"></i> Tạo thực đơn mới
+                        </button>
+                    </div>
+
+                    <div class="nutrition-layout">
+                        <!-- Targets Card Left -->
+                        <div class="grid-card nutrition-targets-card">
+                            <h3>Mục tiêu năng lượng & Macros</h3>
+                            <p class="section-subtext">Được thiết kế cá nhân hóa cho lộ trình giảm cân của bạn</p>
+                            
+                            <div class="target-circle-large-container">
+                                <div class="target-circle-large">
+                                    <svg width="200" height="200" viewBox="0 0 200 200">
+                                        <circle cx="100" cy="100" r="80" stroke="#f0f0f0" stroke-width="16" fill="none"></circle>
+                                        <circle cx="100" cy="100" r="80" stroke="#FF6B00" stroke-width="16" stroke-dasharray="502" stroke-dashoffset="125" fill="none"></circle>
+                                    </svg>
+                                    <div class="target-circle-text">
+                                        <span class="val" id="plan-kcal-val">1.800</span>
+                                        <span class="unit">kcal/ngày</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-macros-detail">
+                                <div class="macro-detail-card">
+                                    <span class="macro-name color-protein">Protein</span>
+                                    <div class="macro-val-large">
+                                        <strong id="plan-protein-val">140</strong>g
+                                    </div>
+                                    <span class="macro-percentage">(31% lượng calo)</span>
+                                    <div class="mini-bar"><div class="mini-bar-fill bg-protein" style="width: 31%"></div></div>
+                                </div>
+                                <div class="macro-detail-card">
+                                    <span class="macro-name color-carb">Carb</span>
+                                    <div class="macro-val-large">
+                                        <strong id="plan-carb-val">180</strong>g
+                                    </div>
+                                    <span class="macro-percentage">(40% lượng calo)</span>
+                                    <div class="mini-bar"><div class="mini-bar-fill bg-carb" style="width: 40%"></div></div>
+                                </div>
+                                <div class="macro-detail-card">
+                                    <span class="macro-name color-fat">Fat</span>
+                                    <div class="macro-val-large">
+                                        <strong id="plan-fat-val">60</strong>g
+                                    </div>
+                                    <span class="macro-percentage">(29% lượng calo)</span>
+                                    <div class="mini-bar"><div class="mini-bar-fill bg-fat" style="width: 29%"></div></div>
+                                </div>
+                            </div>
+
+                            <div class="nutrition-adjuster-form">
+                                <h4>Điều chỉnh thông số cơ thể</h4>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="input-weight">Cân nặng hiện tại (kg)</label>
+                                        <input type="number" id="input-weight" class="form-control" value="82.3" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="input-target-weight">Cân nặng mục tiêu (kg)</label>
+                                        <input type="number" id="input-target-weight" class="form-control" value="75.0" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="input-level">Mức độ hoạt động</label>
+                                        <select id="input-level" class="form-control">
+                                            <option value="light" selected>Ít vận động (văn phòng)</option>
+                                            <option value="medium">Vận động vừa (2-3 buổi/tuần)</option>
+                                            <option value="heavy">Vận động nhiều (5-6 buổi/tuần)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline w-full mt-4" id="btn-recalculate-macros">
+                                    <i data-lucide="sparkles"></i> Tính lại bằng AI
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: 3-Day Menu -->
+                        <div class="menu-right-column">
+                            <!-- Tabs Container -->
+                            <div class="menu-tabs">
+                                <button class="tab-btn active" data-day="1" id="tab-day-1">Ngày 1</button>
+                                <button class="tab-btn" data-day="2" id="tab-day-2">Ngày 2</button>
+                                <button class="tab-btn" data-day="3" id="tab-day-3">Ngày 3</button>
+                            </div>
+
+                            <!-- Tab Contents -->
+                            <div class="menu-tab-content">
+                                <!-- Day 1 Content -->
+                                <div class="day-content active" id="day-1-content">
+                                    <div class="meals-grid">
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-breakfast">
+                                                <h3>Bữa sáng</h3>
+                                                <span class="cal-sum" id="day1-breakfast-total">470 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(1, 'breakfast')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day1-breakfast-img" style="background-image: url('healthy_breakfast.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day1-breakfast-list">
+                                                    <li><span>Trứng gà luộc</span><strong>2 quả (120g) • 155 kcal</strong></li>
+                                                    <li><span>Bánh mì nguyên cám</span><strong>100g • 250 kcal</strong></li>
+                                                    <li><span>Sữa tươi không đường</span><strong>200ml • 65 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-lunch">
+                                                <h3>Bữa trưa</h3>
+                                                <span class="cal-sum" id="day1-lunch-total">555 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(1, 'lunch')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day1-lunch-img" style="background-image: url('healthy_lunch.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day1-lunch-list">
+                                                    <li><span>Ức gà nướng</span><strong>150g • 250 kcal</strong></li>
+                                                    <li><span>Cơm gạo lứt</span><strong>150g • 165 kcal</strong></li>
+                                                    <li><span>Rau luộc hỗn hợp</span><strong>200g • 60 kcal</strong></li>
+                                                    <li><span>Canh bí đỏ</span><strong>200g • 80 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-dinner">
+                                                <h3>Bữa tối</h3>
+                                                <span class="cal-sum" id="day1-dinner-total">436 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(1, 'dinner')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day1-dinner-img" style="background-image: url('healthy_dinner.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day1-dinner-list">
+                                                    <li><span>Cá hồi áp chảo</span><strong>120g • 240 kcal</strong></li>
+                                                    <li><span>Khoai lang hấp</span><strong>100g • 86 kcal</strong></li>
+                                                    <li><span>Măng tây xào tỏi</span><strong>150g • 60 kcal</strong></li>
+                                                    <li><span>Canh cà chua</span><strong>150ml • 50 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-snack">
+                                                <h3>Bữa phụ</h3>
+                                                <span class="cal-sum" id="day1-snack-total">250 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(1, 'snack')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day1-snack-img" style="background-image: url('healthy_snack.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day1-snack-list">
+                                                    <li><span>Quả táo</span><strong>150g • 80 kcal</strong></li>
+                                                    <li><span>Sữa chua Hy Lạp</span><strong>100g • 100 kcal</strong></li>
+                                                    <li><span>Hạnh nhân</span><strong>12g • 70 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Day 2 Content -->
+                                <div class="day-content" id="day-2-content">
+                                    <div class="meals-grid">
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-breakfast">
+                                                <h3>Bữa sáng</h3>
+                                                <span class="cal-sum" id="day2-breakfast-total">435 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(2, 'breakfast')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day2-breakfast-img" style="background-image: url('healthy_breakfast.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day2-breakfast-list">
+                                                    <li><span>Cháo yến mạch chuối</span><strong>250g • 280 kcal</strong></li>
+                                                    <li><span>Hạt chia</span><strong>10g • 50 kcal</strong></li>
+                                                    <li><span>Hạt óc chó</span><strong>15g • 105 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-lunch">
+                                                <h3>Bữa trưa</h3>
+                                                <span class="cal-sum" id="day2-lunch-total">580 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(2, 'lunch')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day2-lunch-img" style="background-image: url('healthy_lunch.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day2-lunch-list">
+                                                    <li><span>Thịt bò xào súp lơ</span><strong>120g • 270 kcal</strong></li>
+                                                    <li><span>Cơm gạo lứt</span><strong>150g • 165 kcal</strong></li>
+                                                    <li><span>Canh cải xanh</span><strong>200g • 55 kcal</strong></li>
+                                                    <li><span>Đậu hũ non sốt cà</span><strong>100g • 90 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-dinner">
+                                                <h3>Bữa tối</h3>
+                                                <span class="cal-sum" id="day2-dinner-total">420 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(2, 'dinner')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day2-dinner-img" style="background-image: url('healthy_dinner.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day2-dinner-list">
+                                                    <li><span>Tôm hấp sả</span><strong>150g • 160 kcal</strong></li>
+                                                    <li><span>Ngô ngọt luộc</span><strong>100g • 90 kcal</strong></li>
+                                                    <li><span>Salad rau trộn dầu giấm</span><strong>150g • 110 kcal</strong></li>
+                                                    <li><span>Canh rong biển</span><strong>200ml • 60 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-snack">
+                                                <h3>Bữa phụ</h3>
+                                                <span class="cal-sum" id="day2-snack-total">200 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(2, 'snack')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day2-snack-img" style="background-image: url('healthy_snack.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day2-snack-list">
+                                                    <li><span>Bưởi da xanh</span><strong>200g • 80 kcal</strong></li>
+                                                    <li><span>Hạt điều</span><strong>20g • 120 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Day 3 Content -->
+                                <div class="day-content" id="day-3-content">
+                                    <div class="meals-grid">
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-breakfast">
+                                                <h3>Bữa sáng</h3>
+                                                <span class="cal-sum" id="day3-breakfast-total">410 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(3, 'breakfast')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day3-breakfast-img" style="background-image: url('healthy_breakfast.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day3-breakfast-list">
+                                                    <li><span>Bánh mì đen phết quả bơ</span><strong>100g • 210 kcal</strong></li>
+                                                    <li><span>Trứng ốp la (ít dầu)</span><strong>1 quả • 80 kcal</strong></li>
+                                                    <li><span>Nước cam ép không đường</span><strong>250ml • 120 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-lunch">
+                                                <h3>Bữa trưa</h3>
+                                                <span class="cal-sum" id="day3-lunch-total">535 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(3, 'lunch')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day3-lunch-img" style="background-image: url('healthy_lunch.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day3-lunch-list">
+                                                    <li><span>Cá thu sốt cà</span><strong>120g • 240 kcal</strong></li>
+                                                    <li><span>Bún lứt</span><strong>120g • 135 kcal</strong></li>
+                                                    <li><span>Rau muống luộc</span><strong>150g • 40 kcal</strong></li>
+                                                    <li><span>Canh cua rau đay</span><strong>200ml • 120 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-dinner">
+                                                <h3>Bữa tối</h3>
+                                                <span class="cal-sum" id="day3-dinner-total">440 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(3, 'dinner')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day3-dinner-img" style="background-image: url('healthy_dinner.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day3-dinner-list">
+                                                    <li><span>Ức vịt áp chảo bỏ da</span><strong>120g • 210 kcal</strong></li>
+                                                    <li><span>Khoai tây nghiền</span><strong>120g • 110 kcal</strong></li>
+                                                    <li><span>Salad củ cải và xà lách</span><strong>150g • 60 kcal</strong></li>
+                                                    <li><span>Canh mướp đắng</span><strong>150g • 60 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="meal-card-full">
+                                            <div class="meal-card-header bg-snack">
+                                                <h3>Bữa phụ</h3>
+                                                <span class="cal-sum" id="day3-snack-total">220 kcal</span>
+                                                <button class="btn-icon btn-random-library" onclick="replaceMealFromLibrary(3, 'snack')" title="Lấy ngẫu nhiên từ thư viện"><i data-lucide="shuffle"></i></button>
+                                            </div>
+                                            <div class="meal-card-img" id="day3-snack-img" style="background-image: url('healthy_snack.png');"></div>
+                                            <div class="meal-card-body">
+                                                <ul class="food-gram-list" id="day3-snack-list">
+                                                    <li><span>Chuối tiêu</span><strong>1 quả (100g) • 90 kcal</strong></li>
+                                                    <li><span>Sữa hạt óc chó</span><strong>200ml • 130 kcal</strong></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- THƯ VIỆN SCREEN -->
+                <section class="screen-section" id="screen-thu-vien">
+                    <div class="screen-header">
+                        <h2>Thư viện bữa ăn</h2>
+                        <span class="badge badge-blue"><i data-lucide="library"></i> Quản lý kho ảnh</span>
+                    </div>
+
+                    <div class="library-upload-zone">
+                        <label class="btn btn-primary btn-lg" style="cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                            <i data-lucide="upload-cloud"></i> Tải ảnh từ máy
+                            <input type="file" id="library-upload-input" accept="image/*" class="hidden-file-input" style="display: none;">
+                        </label>
+                    </div>
+
+                    <div class="library-grid" id="library-grid-container">
+                        <!-- Items will be injected here by JS -->
+                        <!-- Example empty state -->
+                        <div class="empty-state" id="library-empty-state">
+                            <i data-lucide="image" class="empty-icon"></i>
+                            <p>Chưa có ảnh nào. Hãy tải lên ảnh bữa ăn của bạn!</p>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- 4. DIARY SCREEN -->
+                <section class="screen-section" id="screen-nhat-ky">
+                    <div class="screen-header">
+                        <h2>Nhận diện bữa ăn AI</h2>
+                        <span class="date-badge" id="diary-current-date">Hôm nay, 02/06/2026</span>
+                    </div>
+
+                    <div class="scanner-wrapper" style="max-width: 600px; margin: 40px auto;">
+                        <!-- AI Scanning Container -->
+                            <div class="grid-card ai-scanner-card">
+                                <h3>AI nhận diện thực phẩm</h3>
+                                <p class="section-subtext">Tải lên ảnh đĩa thức ăn của bạn để AI tự động ước tính khối lượng & calo</p>
+
+                                <div class="scanner-dropzone" id="scanner-dropzone">
+                                    <div class="scanner-inner" id="scanner-default-view">
+                                        <i data-lucide="camera" class="scanner-icon"></i>
+                                        <p>Kéo & thả ảnh món ăn tại đây</p>
+                                        <span>hoặc click để tải lên</span>
+                                        <input type="file" id="scanner-file-input" accept="image/*" class="hidden-file-input">
+                                    </div>
+
+                                    <!-- Simulator Scanning Overlay -->
+                                    <div class="scanner-processing hidden" id="scanner-processing-view">
+                                        <div class="scanner-image-preview-container">
+                                            <img src="" id="scanner-preview-img" alt="Scanned Food">
+                                            <div class="scan-laser-line"></div>
+                                        </div>
+                                        <div class="scanner-status">
+                                            <span class="spinner-small"></span>
+                                            <span id="scanner-status-text">AI đang phân tích hình ảnh...</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Scanner Success Overlay -->
+                                    <div class="scanner-success hidden" id="scanner-success-view">
+                                        <div class="scanner-success-header">
+                                            <i data-lucide="check-circle-2" class="text-green icon-lg"></i>
+                                            <h4>Đã phân tích xong!</h4>
+                                        </div>
+                                        <div class="detected-food-card">
+                                            <h3 id="detected-food-title">Salad Ức Gà Sốt Mè</h3>
+                                            <div class="detected-stats">
+                                                <span>Tổng khối lượng: <strong id="detected-food-weight">200g</strong></span>
+                                                <span>Tổng Calo: <strong id="detected-food-kcal" class="text-orange-dark">280 kcal</strong></span>
+                                            </div>
+                                            <div class="detected-macros" id="detected-food-macros">
+                                                <span>P: 25g</span>
+                                                <span>C: 15g</span>
+                                                <span>F: 12g</span>
+                                            </div>
+                                            <div class="detected-items-breakdown">
+                                                <h4 style="font-size: 13px; color: var(--text-light); margin-bottom: 8px; margin-top: 16px;">Chi tiết thành phần:</h4>
+                                                <ul id="detected-food-items-list" class="food-breakdown-list">
+                                                    <!-- Items will be generated here -->
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="success-actions">
+                                            <button class="btn btn-outline-sm" id="btn-scan-again" style="width: 100%;">Quét ảnh khác</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="scanning-demo-tips">
+                                    <span class="demo-tip-badge">DEMO</span>
+                                    <p>Nhấp vào ô quét ảnh hoặc kéo thả ảnh <strong id="demo-trigger-scan" class="cursor-pointer text-underline">healthy_salad.png</strong> đã tạo sẵn để chạy thử mô phỏng AI!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. WATER SCREEN -->
+                <section class="screen-section" id="screen-nuoc">
+                    <div class="screen-header">
+                        <h2>Theo dõi nước</h2>
+                        <span class="badge badge-blue"><i data-lucide="droplet"></i> Hydration Tracking</span>
+                    </div>
+
+                    <div class="water-layout">
+                        <!-- Left Column: Visual Dynamic Glass -->
+                        <div class="grid-card water-visual-card">
+                            <h3>Lượng nước đã nạp hôm nay</h3>
+                            
+                            <!-- The Interactive Glass Graphic -->
+                            <div class="water-glass-container">
+                                <div class="water-glass">
+                                    <div class="water-level" id="water-level-fill" style="height: 60%;">
+                                        <!-- Ripple Effect SVG / CSS -->
+                                        <div class="water-wave wave-1"></div>
+                                        <div class="water-wave wave-2"></div>
+                                    </div>
+                                    <div class="glass-indicators">
+                                        <span>2.5L</span>
+                                        <span>2.0L</span>
+                                        <span>1.5L</span>
+                                        <span>1.0L</span>
+                                        <span>0.5L</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="water-progress-text">
+                                <h2 id="water-current-text">1.5 <span class="unit">lít</span></h2>
+                                <p>Mục tiêu: <strong>2.5 lít</strong> (10 ly)</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Interactive Buttons & Logs -->
+                        <div class="water-controls-card grid-card">
+                            <h3>Bảng nạp nước nhanh</h3>
+                            <p class="section-subtext">Click các tùy chọn để cộng thêm lượng nước bạn đã uống</p>
+
+                            <div class="water-quick-grid">
+                                <button class="water-btn-large" id="btn-add-water-250">
+                                    <div class="w-icon-circle bg-blue-light text-blue">
+                                        <i data-lucide="glass-water"></i>
+                                    </div>
+                                    <div class="w-text">
+                                        <h4>1 Ly nước</h4>
+                                        <span>+250ml</span>
+                                    </div>
+                                </button>
+
+                                <button class="water-btn-large" id="btn-add-coffee-150">
+                                    <div class="w-icon-circle bg-coffee-light text-coffee">
+                                        <i data-lucide="coffee"></i>
+                                    </div>
+                                    <div class="w-text">
+                                        <h4>Cà phê</h4>
+                                        <span>+150ml</span>
+                                    </div>
+                                </button>
+
+                                <button class="water-btn-large" id="btn-add-tea-200">
+                                    <div class="w-icon-circle bg-tea-light text-tea">
+                                        <i data-lucide="cup-soda"></i>
+                                    </div>
+                                    <div class="w-text">
+                                        <h4>Trà xanh</h4>
+                                        <span>+200ml</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- Water Warning Banner -->
+                            <div class="water-warning-banner" id="water-warning-alert">
+                                <i data-lucide="alert-circle" class="alert-icon"></i>
+                                <div class="alert-body">
+                                    <h4>Bạn còn thiếu <span id="water-missing-liters">1.0</span> lít nước hôm nay</h4>
+                                    <p>Tương đương khoảng <span id="water-missing-glasses">4</span> ly nước nữa. Hãy uống đều đặn nhé!</p>
+                                </div>
+                            </div>
+
+                            <!-- Water Log History -->
+                            <div class="water-history">
+                                <h4>Nhật ký nạp nước hôm nay</h4>
+                                <ul class="water-history-list" id="water-history-container">
+                                    <!-- Populated via Javascript -->
+                                </ul>
+                                <button class="btn btn-outline-sm btn-reset-water" id="btn-reset-water">
+                                    <i data-lucide="rotate-ccw"></i> Reset hôm nay
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. DISCIPLINE WARNING SCREEN -->
+                <section class="screen-section" id="screen-ky-luat">
+                    <div class="screen-header">
+                        <h2>Trạng thái mục tiêu</h2>
+                        <span class="badge badge-orange"><i data-lucide="shield-alert"></i> Hệ thống Kỷ luật</span>
+                    </div>
+
+                    <!-- Target Status Color Banner -->
+                    <div class="discipline-status-banner status-yellow" id="discipline-active-banner">
+                        <div class="banner-icon" id="discipline-banner-icon">
+                            <i data-lucide="alert-triangle"></i>
+                        </div>
+                        <div class="banner-body">
+                            <h2 id="discipline-banner-title">Bạn chưa cập nhật dữ liệu hôm nay</h2>
+                            <p id="discipline-banner-desc">Hãy cập nhật nhật ký ăn uống hoặc nhấn nút "Check-in ngay" bên dưới để hoàn tất mục tiêu hôm nay và duy trì streak.</p>
+                        </div>
+                    </div>
+
+                    <div class="discipline-layout">
+                        <!-- Streak and Checker Details Left -->
+                        <div class="grid-card discipline-streak-card">
+                            <h3>Phân tích kỷ luật ăn uống</h3>
+                            
+                            <div class="discipline-streaks-row">
+                                <div class="discipline-stat-box">
+                                    <span class="s-label">Chuỗi check-in hiện tại</span>
+                                    <div class="s-val text-orange">
+                                        <span id="discipline-streak-current">18</span> <span class="unit">ngày</span>
+                                    </div>
+                                    <span class="s-sub">Liên tục 🔥</span>
+                                </div>
+                                <div class="discipline-stat-box">
+                                    <span class="s-label">Chuỗi kỷ lục cao nhất</span>
+                                    <div class="s-val text-green">
+                                        <span>45</span> <span class="unit">ngày</span>
+                                    </div>
+                                    <span class="s-sub">Đạt được vào 15/04/2026</span>
+                                </div>
+                                <div class="discipline-stat-box">
+                                    <span class="s-label">Tỷ lệ tuân thủ tháng</span>
+                                    <div class="s-val text-blue">
+                                        <span id="discipline-compliance-month">94</span><span class="unit">%</span>
+                                    </div>
+                                    <span class="s-sub">Tổng 28/30 ngày đạt mục tiêu</span>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Check-in Button area -->
+                            <div class="checkin-action-box">
+                                <h4>Nhật ký kỷ luật hôm nay</h4>
+                                <p class="text-muted">Nhấp vào nút bên dưới để xác nhận hôm nay bạn đã duy trì đúng kỷ luật ăn uống theo kế hoạch.</p>
+                                <button class="btn btn-primary btn-large btn-checkin-full" id="btn-discipline-checkin">
+                                    <i data-lucide="check-circle"></i> Check-in ngay hôm nay
+                                </button>
+                                <span class="checkin-time-info" id="discipline-checkin-timestamp">Cần check-in trước 23:59 hôm nay</span>
+                            </div>
+                        </div>
+
+                        <!-- 30-day Contribution Full View Right -->
+                        <div class="grid-card discipline-calendar-card">
+                            <div class="card-header">
+                                <h3>Bản đồ thói quen 30 ngày</h3>
+                                <div class="calendar-legends">
+                                    <span class="legend"><span class="dot dot-green"></span> Đã check-in</span>
+                                    <span class="legend"><span class="dot dot-orange"></span> Chưa check-in</span>
+                                    <span class="legend"><span class="dot dot-grey"></span> Bỏ lỡ</span>
+                                </div>
+                            </div>
+                            <p class="section-subtext">Theo dõi tính liên tục như bảng đóng góp mã nguồn GitHub hoặc chuỗi bài học Duolingo</p>
+                            
+                            <div class="habit-heatmap-container" id="habit-heatmap-grid">
+                                <!-- Generated dynamically via JS to look like GitHub contribution grid -->
+                            </div>
+
+                            <div class="discipline-risk-card">
+                                <h4>Đánh giá rủi ro bỏ cuộc</h4>
+                                <div class="risk-meter-container">
+                                    <div class="risk-bar-bg">
+                                        <div class="risk-bar-fg" id="discipline-risk-bar" style="width: 15%; background: var(--color-green);"></div>
+                                    </div>
+                                    <div class="risk-labels">
+                                        <span class="text-green">Rất thấp</span>
+                                        <span>Trung bình</span>
+                                        <span class="text-red">Nguy cơ cao</span>
+                                    </div>
+                                </div>
+                                <p class="risk-evaluation-text" id="discipline-risk-eval">Hệ thống phân tích: Bạn đang duy trì phong độ rất tốt (18 ngày streak). Rủi ro bỏ cuộc là <strong>15% (Rất thấp)</strong>. Hãy duy trì thói quen!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Debug and Testing Section (Simulating streak states) -->
+                    <div class="grid-card test-discipline-states-card">
+                        <h3>[Bảng giả lập chạy thử] Thử nghiệm các kịch bản kỷ luật</h3>
+                        <p class="section-subtext">Click các trạng thái giả lập bên dưới để xem sự thay đổi giao diện theo các mức độ cảnh báo kỷ luật</p>
+                        <div class="test-states-buttons">
+                            <button class="btn btn-success-sm" id="btn-test-state-green">
+                                <span class="dot dot-green"></span> Giả lập Xanh (Đã check-in)
+                            </button>
+                            <button class="btn btn-warning-sm" id="btn-test-state-yellow">
+                                <span class="dot dot-orange"></span> Giả lập Vàng (Chưa cập nhật hôm nay)
+                            </button>
+                            <button class="btn btn-orange-sm" id="btn-test-state-orange">
+                                <span class="dot dot-orange"></span> Giả lập Cam (Đã bỏ lỡ 2 ngày)
+                            </button>
+                            <button class="btn btn-danger-sm" id="btn-test-state-red">
+                                <span class="dot dot-red"></span> Giả lập Đỏ (Nguy cơ bỏ cuộc cao)
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Dialog / Popover -->
+    <div class="notification-popover hidden" id="notification-popover">
+        <div class="popover-header">
+            <h4>Thông báo</h4>
+            <button class="btn-close" id="btn-close-notifications">&times;</button>
+        </div>
+        <div class="popover-body">
+            <div class="notif-item unread">
+                <div class="notif-icon bg-orange-light text-orange">
+                    <i data-lucide="alert-circle"></i>
+                </div>
+                <div class="notif-content">
+                    <p><strong>Chưa cập nhật dữ liệu:</strong> Đừng quên check-in hôm nay để bảo toàn chuỗi 18 ngày liên tục!</p>
+                    <span>10 phút trước</span>
+                </div>
+            </div>
+            <div class="notif-item unread">
+                <div class="notif-icon bg-blue-light text-blue">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <div class="notif-content">
+                    <p><strong>Đề xuất AI mới:</strong> Thực đơn Ngày 2 vừa được tinh chỉnh dựa trên chỉ số cân nặng hôm nay của bạn.</p>
+                    <span>2 giờ trước</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weight Entry Modal -->
+    <div class="modal-overlay hidden" id="weight-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Ghi nhận cân nặng hôm nay</h3>
+                <button class="modal-close-btn" id="btn-close-weight-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modal-input-weight">Cân nặng (kg)</label>
+                    <input type="number" id="modal-input-weight" class="form-control" value="82.3" step="0.1" min="30" max="200">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-outline" id="btn-cancel-weight-modal">Hủy</button>
+                    <button class="btn btn-primary" id="btn-save-weight-modal">Lưu dữ liệu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal -->
+    <div id="custom-confirm-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 320px; text-align: center; border-radius: 16px; padding: 24px;">
+            <div style="background: #fee2e2; color: #ef4444; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i data-lucide="alert-triangle"></i>
+            </div>
+            <h3 style="margin-bottom: 8px; font-size: 18px;">Xóa ảnh này?</h3>
+            <p style="color: var(--text-light); font-size: 14px; margin-bottom: 24px;">Bạn có chắc chắn muốn xóa ảnh này khỏi Thư viện? Hành động này không thể hoàn tác.</p>
+            <div style="display: flex; gap: 12px;">
+                <button id="btn-confirm-cancel" class="btn btn-outline-sm" style="flex: 1;">Hủy</button>
+                <button id="btn-confirm-delete" class="btn btn-primary" style="flex: 1; background-color: #ef4444; border-color: #ef4444; color: white;">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main JavaScript App Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
