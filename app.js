@@ -1482,28 +1482,57 @@ function initLibrary() {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    try {
-                        const newItem = {
-                            id: Date.now().toString(),
-                            img: event.target.result,
-                            analyzed: false,
-                            name: "",
-                            weight: "",
-                            kcal: 0
-                        };
-                        state.library.push(newItem);
-                        saveState();
-                        renderLibraryGrid();
-                        // Reset input so the same file can be uploaded again
-                        uploadInput.value = '';
-                    } catch (err) {
-                        console.error(err);
-                        if (err.name === 'QuotaExceededError') {
-                            showNotification("Lỗi dung lượng", "Ảnh quá lớn, không thể lưu vào bộ nhớ cục bộ.", "error");
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const MAX_SIZE = 800; // Giảm kích thước tối đa xuống 800px
+
+                        if (width > height) {
+                            if (width > MAX_SIZE) {
+                                height *= MAX_SIZE / width;
+                                width = MAX_SIZE;
+                            }
                         } else {
-                            showNotification("Lỗi", "Đã có lỗi xảy ra khi xử lý ảnh.", "error");
+                            if (height > MAX_SIZE) {
+                                width *= MAX_SIZE / height;
+                                height = MAX_SIZE;
+                            }
                         }
-                    }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Nén ảnh sang định dạng JPEG chất lượng 70%
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+                        try {
+                            const newItem = {
+                                id: Date.now().toString(),
+                                img: compressedBase64,
+                                analyzed: false,
+                                name: "",
+                                weight: "",
+                                kcal: 0
+                            };
+                            state.library.push(newItem);
+                            saveState();
+                            renderLibraryGrid();
+                            uploadInput.value = '';
+                        } catch (err) {
+                            console.error(err);
+                            state.library.pop(); // Xóa ảnh vừa thêm nếu lưu lỗi
+                            if (err.name === 'QuotaExceededError' || (err.message && err.message.includes('quota'))) {
+                                showNotification("Lỗi dung lượng", "Dù đã nén nhưng bộ nhớ vẫn đầy. Bạn hãy xóa bớt các ảnh cũ trong thư viện nhé.", "error");
+                            } else {
+                                showNotification("Lỗi", "Đã có lỗi xảy ra khi xử lý ảnh.", "error");
+                            }
+                        }
+                    };
+                    img.src = event.target.result;
                 };
                 reader.readAsDataURL(file);
             }
