@@ -134,7 +134,11 @@ function loadState() {
                     state.user.avatar = "tung_chu_avatar.png";
                     db.ref('shared_state').set(state);
                 }
-                localStorage.setItem('fitlife_state', JSON.stringify(state));
+                try {
+                    localStorage.setItem('fitlife_state', JSON.stringify(state));
+                } catch (e) {
+                    console.warn("Lỗi lưu localStorage (có thể đầy bộ nhớ):", e);
+                }
                 
                 updateUI();
                 if (weightChart) renderWeightChart();
@@ -165,7 +169,11 @@ function loadState() {
 }
 
 function saveState() {
-    localStorage.setItem('fitlife_state', JSON.stringify(state));
+    try {
+        localStorage.setItem('fitlife_state', JSON.stringify(state));
+    } catch (e) {
+        console.warn("Lỗi lưu localStorage (có thể đầy bộ nhớ):", e);
+    }
     updateUI();
     if (db && !isSyncingFromFirebase) {
         db.ref('shared_state').set(state).catch(err => {
