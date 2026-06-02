@@ -1309,6 +1309,7 @@ Yêu cầu:
 - Tổng calo mỗi ngày xấp xỉ ${targetKcal} kcal
 - Món ăn phải là món Việt Nam phổ biến, dễ nấu, phù hợp giảm cân
 - Mỗi bữa có tên tổng quát mô tả ngắn
+- Mỗi bữa có trường "imageKeyword": từ khóa tiếng Anh mô tả món ăn chính để tìm ảnh (ví dụ: "grilled chicken rice", "pho soup", "fruit salad", "oatmeal banana")
 
 Trả về JSON thuần túy (KHÔNG bọc markdown):
 {
@@ -1317,18 +1318,22 @@ Trả về JSON thuần túy (KHÔNG bọc markdown):
       "day": 1,
       "breakfast": {
         "title": "Tên bữa sáng",
+        "imageKeyword": "english food keyword",
         "items": [{"name": "Tên món", "weight": gram, "kcal": số}]
       },
       "lunch": {
-        "title": "Tên bữa trưa", 
+        "title": "Tên bữa trưa",
+        "imageKeyword": "english food keyword",
         "items": [{"name": "Tên món", "weight": gram, "kcal": số}]
       },
       "dinner": {
         "title": "Tên bữa tối",
+        "imageKeyword": "english food keyword",
         "items": [{"name": "Tên món", "weight": gram, "kcal": số}]
       },
       "snack": {
         "title": "Tên bữa phụ",
+        "imageKeyword": "english food keyword",
         "items": [{"name": "Tên món", "weight": gram, "kcal": số}]
       }
     }
@@ -1391,20 +1396,44 @@ function applyAIMenu(aiMenu) {
                 totalEl.innerText = `${sum} kcal`;
             }
             
-            // Use existing food images based on meal type
-            if (imgEl) {
-                const imgMap = {
-                    breakfast: ['healthy_breakfast.png', 'pho_ga.png', 'banh_mi_den.png', 'yen_mach.png'],
-                    lunch: ['healthy_lunch.png', 'ca_thu.png', 'thit_heo.png'],
-                    dinner: ['healthy_dinner.png', 'tom_ram.png', 'bo_ap_chao.png'],
-                    snack: ['healthy_snack.png', 'qua_bo.png', 'hat_macca.png', 'sinh_to_dau.png']
-                };
-                const imgs = imgMap[meal] || ['healthy_salad.png'];
-                const randomImg = imgs[Math.floor(Math.random() * imgs.length)];
-                imgEl.style.backgroundImage = `url('${randomImg}')`;
+            // Fetch real food image based on AI keyword
+            if (imgEl && mealData.imageKeyword) {
+                fetchFoodImage(mealData.imageKeyword, meal).then(url => {
+                    if (url) imgEl.style.backgroundImage = `url('${url}')`;
+                });
             }
         });
     });
+}
+
+// Fetch food image from free Pexels API
+async function fetchFoodImage(keyword, mealType) {
+    try {
+        const query = encodeURIComponent(keyword + ' food');
+        const response = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=5&orientation=landscape`, {
+            headers: { 'Authorization': 'qfBkF5v10na1FqzA8LV6w0B9bIVRHpKRNLHPaxCEsNfr0D3W1urNMYqf' }
+        });
+        
+        if (!response.ok) throw new Error('Pexels API failed');
+        
+        const data = await response.json();
+        if (data.photos && data.photos.length > 0) {
+            // Pick a random photo from results
+            const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
+            return photo.src.medium; // 350x233 size, good for cards
+        }
+    } catch (err) {
+        console.warn('Failed to fetch food image:', err);
+    }
+    
+    // Fallback to local images
+    const fallbackMap = {
+        breakfast: 'healthy_breakfast.png',
+        lunch: 'healthy_lunch.png',
+        dinner: 'healthy_dinner.png',
+        snack: 'healthy_snack.png'
+    };
+    return fallbackMap[mealType] || 'healthy_salad.png';
 }
 
 function randomizeMenus() {
