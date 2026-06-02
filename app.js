@@ -1479,9 +1479,70 @@ document.addEventListener('DOMContentLoaded', () => {
     if (chartRange) {
         chartRange.addEventListener('change', renderWeightChart);
     }
+    
+    // Background task to compress existing uncompressed images in library to free up memory
+    compressExistingLibraryImages();
 });
 
 // --- MEAL LIBRARY FUNCTIONS ---
+function compressExistingLibraryImages() {
+    if (!state.library || state.library.length === 0) return;
+    let hasChanges = false;
+    let promises = state.library.map((item, index) => {
+        return new Promise((resolve) => {
+            // Check if base64 length indicates a large file (> 200KB)
+            if (item.img && item.img.length > 250000) { 
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const MAX_SIZE = 800;
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressed = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    if (compressed.length < item.img.length) {
+                        state.library[index].img = compressed;
+                        hasChanges = true;
+                    }
+                    resolve();
+                };
+                img.onerror = resolve; // Skip on error
+                img.src = item.img;
+            } else {
+                resolve();
+            }
+        });
+    });
+
+    Promise.all(promises).then(() => {
+        if (hasChanges) {
+            try {
+                localStorage.setItem('fitlife_state', JSON.stringify(state));
+                if (typeof db !== 'undefined' && db && !isSyncingFromFirebase) {
+                    db.ref('shared_state').set(state).catch(e => console.error(e));
+                }
+                console.log("Đã tự động nén các ảnh cũ, giải phóng bộ nhớ thành công!");
+            } catch (e) {
+                console.error("Lỗi khi lưu ảnh đã nén", e);
+            }
+        }
+    });
+}
 function initLibrary() {
     if (!state.library) state.library = [];
     const uploadInput = document.getElementById('library-upload-input');
