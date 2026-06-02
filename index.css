@@ -1695,7 +1695,7 @@ button {
 .bg-snack { background: linear-gradient(135deg, #10B981 0%, #34D399 100%); }
 
 .meal-card-img {
-    height: 160px;
+    aspect-ratio: 16 / 9;
     width: 100%;
     background-size: cover;
     background-position: center;
