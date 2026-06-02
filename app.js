@@ -84,6 +84,23 @@ const DEFAULT_STATE = {
     }
 };
 
+// --- Firebase Setup ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDPrHvRL3MqqLmuPol_ZgTtizlFQZuf4-s",
+  authDomain: "giam-can-app.firebaseapp.com",
+  projectId: "giam-can-app",
+  storageBucket: "giam-can-app.firebasestorage.app",
+  messagingSenderId: "660720606826",
+  appId: "1:660720606826:web:15e66d0da97987d0c87413"
+};
+
+let db = null;
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+}
+
+let isSyncingFromFirebase = false;
 let state = {};
 let weightChart = null;
 
@@ -100,11 +117,51 @@ function loadState() {
     } else {
         state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
+
+    if (db) {
+        db.ref('shared_state').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                isSyncingFromFirebase = true;
+                state = data;
+                localStorage.setItem('fitlife_state', JSON.stringify(state));
+                
+                updateUI();
+                if (weightChart) renderWeightChart();
+                
+                const libScreen = document.getElementById('screen-thu-vien');
+                if (libScreen && !libScreen.classList.contains('hidden')) {
+                    if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
+                }
+
+                const diaryScreen = document.getElementById('screen-thuc-don');
+                if (diaryScreen && !diaryScreen.classList.contains('hidden')) {
+                    const activeTab = document.querySelector('.day-tab.active');
+                    if (activeTab) {
+                        const dayText = activeTab.querySelector('strong').innerText;
+                        const dayKey = dayText.toLowerCase();
+                        if (typeof renderDiary === 'function') renderDiary(dayKey);
+                    }
+                }
+                
+                isSyncingFromFirebase = false;
+            } else {
+                if (!isSyncingFromFirebase) {
+                    db.ref('shared_state').set(state);
+                }
+            }
+        });
+    }
 }
 
 function saveState() {
     localStorage.setItem('fitlife_state', JSON.stringify(state));
     updateUI();
+    if (db && !isSyncingFromFirebase) {
+        db.ref('shared_state').set(state).catch(err => {
+            console.error("Lỗi lưu Firebase:", err);
+        });
+    }
 }
 
 // --- Dynamic Date Formatting ---
