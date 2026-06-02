@@ -1510,25 +1510,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Load data from localStorage
     loadState();
 
-    // 2. Initialize modules
-    initNavigation();
-    initMenuTabs();
-    initNotificationDialog();
-    initWeightModal();
-    initWaterTracker();
-    initManualFoodForm();
-    initFoodScanner();
-    initMenuGenerator();
-    initDisciplineSimulator();
-    initSyncButton();
-    initRecalculateTrigger();
-    initCheckInTriggers();
-    initLibrary();
+    // 2. Initialize modules (each wrapped in try-catch so one failure doesn't block others)
+    const initModules = [
+        ['initNavigation', initNavigation],
+        ['initMenuTabs', initMenuTabs],
+        ['initNotificationDialog', initNotificationDialog],
+        ['initWeightModal', initWeightModal],
+        ['initWaterTracker', initWaterTracker],
+        ['initManualFoodForm', initManualFoodForm],
+        ['initFoodScanner', initFoodScanner],
+        ['initMenuGenerator', initMenuGenerator],
+        ['initDisciplineSimulator', initDisciplineSimulator],
+        ['initSyncButton', initSyncButton],
+        ['initRecalculateTrigger', initRecalculateTrigger],
+        ['initCheckInTriggers', initCheckInTriggers],
+        ['initLibrary', initLibrary],
+    ];
+    
+    initModules.forEach(([name, fn]) => {
+        try {
+            fn();
+        } catch (err) {
+            console.warn(`Module ${name} init failed:`, err);
+        }
+    });
 
     // 3. Render Views
-    randomizeMenus();
+    try { randomizeMenus(); } catch(e) { console.warn('randomizeMenus error:', e); }
     updateUI();
-    renderWeightChart();
+    try { renderWeightChart(); } catch(e) { console.warn('renderWeightChart error:', e); }
 
     // Attach listener to chart range switcher
     const chartRange = document.getElementById('chart-range-select');
