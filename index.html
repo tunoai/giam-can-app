@@ -462,89 +462,15 @@
                         </button>
                     </div>
 
-                    <div class="nutrition-layout">
-                        <!-- Targets Card Left -->
-                        <div class="grid-card nutrition-targets-card">
-                            <h3>Mục tiêu năng lượng & Macros</h3>
-                            <p class="section-subtext">Được thiết kế cá nhân hóa cho lộ trình giảm cân của bạn</p>
-                            
-                            <div class="target-circle-large-container">
-                                <div class="target-circle-large">
-                                    <svg width="200" height="200" viewBox="0 0 200 200">
-                                        <circle cx="100" cy="100" r="80" stroke="#f0f0f0" stroke-width="16" fill="none"></circle>
-                                        <circle cx="100" cy="100" r="80" stroke="#FF6B00" stroke-width="16" stroke-dasharray="502" stroke-dashoffset="125" fill="none"></circle>
-                                    </svg>
-                                    <div class="target-circle-text">
-                                        <span class="val" id="plan-kcal-val">1.800</span>
-                                        <span class="unit">kcal/ngày</span>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Tabs Container -->
+                    <div class="menu-tabs">
+                        <button class="tab-btn active" data-day="1" id="tab-day-1">Ngày 1</button>
+                        <button class="tab-btn" data-day="2" id="tab-day-2">Ngày 2</button>
+                        <button class="tab-btn" data-day="3" id="tab-day-3">Ngày 3</button>
+                    </div>
 
-                            <div class="nutrition-macros-detail">
-                                <div class="macro-detail-card">
-                                    <span class="macro-name color-protein">Protein</span>
-                                    <div class="macro-val-large">
-                                        <strong id="plan-protein-val">140</strong>g
-                                    </div>
-                                    <span class="macro-percentage">(31% lượng calo)</span>
-                                    <div class="mini-bar"><div class="mini-bar-fill bg-protein" style="width: 31%"></div></div>
-                                </div>
-                                <div class="macro-detail-card">
-                                    <span class="macro-name color-carb">Carb</span>
-                                    <div class="macro-val-large">
-                                        <strong id="plan-carb-val">180</strong>g
-                                    </div>
-                                    <span class="macro-percentage">(40% lượng calo)</span>
-                                    <div class="mini-bar"><div class="mini-bar-fill bg-carb" style="width: 40%"></div></div>
-                                </div>
-                                <div class="macro-detail-card">
-                                    <span class="macro-name color-fat">Fat</span>
-                                    <div class="macro-val-large">
-                                        <strong id="plan-fat-val">60</strong>g
-                                    </div>
-                                    <span class="macro-percentage">(29% lượng calo)</span>
-                                    <div class="mini-bar"><div class="mini-bar-fill bg-fat" style="width: 29%"></div></div>
-                                </div>
-                            </div>
-
-                            <div class="nutrition-adjuster-form">
-                                <h4>Điều chỉnh thông số cơ thể</h4>
-                                <div class="form-grid">
-                                    <div class="form-group">
-                                        <label for="input-weight">Cân nặng hiện tại (kg)</label>
-                                        <input type="number" id="input-weight" class="form-control" value="82.3" step="0.1">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="input-target-weight">Cân nặng mục tiêu (kg)</label>
-                                        <input type="number" id="input-target-weight" class="form-control" value="75.0" step="0.1">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="input-level">Mức độ hoạt động</label>
-                                        <select id="input-level" class="form-control">
-                                            <option value="light" selected>Ít vận động (văn phòng)</option>
-                                            <option value="medium">Vận động vừa (2-3 buổi/tuần)</option>
-                                            <option value="heavy">Vận động nhiều (5-6 buổi/tuần)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button class="btn btn-outline w-full mt-4" id="btn-recalculate-macros">
-                                    <i data-lucide="sparkles"></i> Tính lại bằng AI
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Right Column: 3-Day Menu -->
-                        <div class="menu-right-column">
-                            <!-- Tabs Container -->
-                            <div class="menu-tabs">
-                                <button class="tab-btn active" data-day="1" id="tab-day-1">Ngày 1</button>
-                                <button class="tab-btn" data-day="2" id="tab-day-2">Ngày 2</button>
-                                <button class="tab-btn" data-day="3" id="tab-day-3">Ngày 3</button>
-                            </div>
-
-                            <!-- Tab Contents -->
-                            <div class="menu-tab-content">
+                    <!-- Tab Contents -->
+                    <div class="menu-tab-content">
                                 <!-- Day 1 Content -->
                                 <div class="day-content active" id="day-1-content">
                                     <div class="meals-grid">
@@ -756,7 +682,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     </div>
                 </section>
 
