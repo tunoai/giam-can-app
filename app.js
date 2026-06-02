@@ -88,6 +88,7 @@ const DEFAULT_STATE = {
 const firebaseConfig = {
   apiKey: "AIzaSyDPrHvRL3MqqLmuPol_ZgTtizlFQZuf4-s",
   authDomain: "giam-can-app.firebaseapp.com",
+  databaseURL: "https://giam-can-app-default-rtdb.asia-southeast1.firebasedatabase.app/",
   projectId: "giam-can-app",
   storageBucket: "giam-can-app.firebasestorage.app",
   messagingSenderId: "660720606826",
