@@ -105,6 +105,62 @@ let isSyncingFromFirebase = false;
 let state = {};
 let weightChart = null;
 
+// --- IndexedDB Image Cache (50MB+ capacity, much larger than localStorage) ---
+const IMG_DB_NAME = 'fitlife_images';
+const IMG_STORE = 'images';
+
+function openImgDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(IMG_DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+            e.target.result.createObjectStore(IMG_STORE);
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e.target.error);
+    });
+}
+
+function saveImageToCache(id, base64) {
+    return openImgDB().then(db => {
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(IMG_STORE, 'readwrite');
+            tx.objectStore(IMG_STORE).put(base64, id);
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error);
+        });
+    }).catch(e => console.warn('Cache save error:', e));
+}
+
+function getImageFromCache(id) {
+    return openImgDB().then(db => {
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(IMG_STORE, 'readonly');
+            const req = tx.objectStore(IMG_STORE).get(id);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+        });
+    }).catch(() => null);
+}
+
+function saveAllImagesToCache(library) {
+    if (!library || library.length === 0) return Promise.resolve();
+    const promises = library
+        .filter(item => item.img && item.img.length > 10)
+        .map(item => saveImageToCache(item.id, item.img));
+    return Promise.all(promises).catch(e => console.warn('Batch cache error:', e));
+}
+
+function loadImagesFromCache(library) {
+    if (!library || library.length === 0) return Promise.resolve();
+    const promises = library.map(item => {
+        if (item.img && item.img.length > 10) return Promise.resolve(); // Already has image
+        return getImageFromCache(item.id).then(cached => {
+            if (cached) item.img = cached;
+        });
+    });
+    return Promise.all(promises).catch(e => console.warn('Cache load error:', e));
+}
+
 // --- State Persist & Load ---
 function loadState() {
     const saved = localStorage.getItem('fitlife_state');
@@ -122,6 +178,11 @@ function loadState() {
     } else {
         state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
+
+    // Load cached images from IndexedDB immediately (fast, local)
+    loadImagesFromCache(state.library).then(() => {
+        if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
+    });
 
     if (db) {
         db.ref('shared_state').on('value', (snapshot) => {
@@ -148,11 +209,14 @@ function loadState() {
                 } catch (e) {
                     console.warn("Lỗi lưu localStorage:", e);
                 }
+
+                // Cache all images to IndexedDB for instant F5 reload
+                saveAllImagesToCache(state.library);
                 
                 updateUI();
                 try { if (weightChart) renderWeightChart(); } catch(e) {}
                 
-                // Always re-render library when Firebase data arrives (images are now available)
+                // Always re-render library when Firebase data arrives
                 if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
 
                 const diaryScreen = document.getElementById('screen-thuc-don');
@@ -182,7 +246,7 @@ function saveState() {
         if (lightState.library && lightState.library.length > 0) {
             lightState.library = lightState.library.map(item => {
                 const copy = Object.assign({}, item);
-                delete copy.img; // Remove heavy base64 image data
+                delete copy.img;
                 return copy;
             });
         }
@@ -190,6 +254,10 @@ function saveState() {
     } catch (e) {
         console.warn("Lỗi lưu localStorage:", e);
     }
+
+    // Cache images to IndexedDB (fast local storage, 50MB+)
+    saveAllImagesToCache(state.library);
+
     updateUI();
     // Save FULL state (with images) to Firebase cloud
     if (db && !isSyncingFromFirebase) {
