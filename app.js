@@ -5,8 +5,8 @@
 // --- App State Definition ---
 const DEFAULT_STATE = {
     user: {
-        name: "Nguyễn Mai",
-        avatar: "nguyen_mai_avatar.png"
+        name: "Tùng Chu",
+        avatar: "tung_chu_avatar.png"
     },
     library: [],
     weight: {
@@ -111,6 +111,10 @@ function loadState() {
     if (saved) {
         try {
             state = JSON.parse(saved);
+            if (state.user && state.user.name === "Nguyễn Mai") {
+                state.user.name = "Tùng Chu";
+                state.user.avatar = "tung_chu_avatar.png";
+            }
         } catch (e) {
             console.error("Lỗi parse JSON state, dùng mặc định", e);
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -125,6 +129,11 @@ function loadState() {
             if (data) {
                 isSyncingFromFirebase = true;
                 state = data;
+                if (state.user && state.user.name === "Nguyễn Mai") {
+                    state.user.name = "Tùng Chu";
+                    state.user.avatar = "tung_chu_avatar.png";
+                    db.ref('shared_state').set(state);
+                }
                 localStorage.setItem('fitlife_state', JSON.stringify(state));
                 
                 updateUI();
