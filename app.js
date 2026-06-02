@@ -134,19 +134,26 @@ function loadState() {
                     state.user.avatar = "tung_chu_avatar.png";
                     db.ref('shared_state').set(state);
                 }
+                // Save lightweight state (no images) to localStorage
                 try {
-                    localStorage.setItem('fitlife_state', JSON.stringify(state));
+                    const lightState = JSON.parse(JSON.stringify(state));
+                    if (lightState.library && lightState.library.length > 0) {
+                        lightState.library = lightState.library.map(item => {
+                            const copy = Object.assign({}, item);
+                            delete copy.img;
+                            return copy;
+                        });
+                    }
+                    localStorage.setItem('fitlife_state', JSON.stringify(lightState));
                 } catch (e) {
-                    console.warn("Lỗi lưu localStorage (có thể đầy bộ nhớ):", e);
+                    console.warn("Lỗi lưu localStorage:", e);
                 }
                 
                 updateUI();
-                if (weightChart) renderWeightChart();
+                try { if (weightChart) renderWeightChart(); } catch(e) {}
                 
-                const libScreen = document.getElementById('screen-thu-vien');
-                if (libScreen && !libScreen.classList.contains('hidden')) {
-                    if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
-                }
+                // Always re-render library when Firebase data arrives (images are now available)
+                if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
 
                 const diaryScreen = document.getElementById('screen-thuc-don');
                 if (diaryScreen && !diaryScreen.classList.contains('hidden')) {
@@ -1697,10 +1704,16 @@ function renderLibraryGrid() {
 
     let html = '';
     state.library.forEach(item => {
+        const imgSrc = item.img || '';
+        const hasImage = imgSrc && imgSrc.length > 10;
+        const imgTag = hasImage 
+            ? `<img src="${imgSrc}" alt="${item.name || 'Ảnh món ăn'}">`
+            : `<div style="width:100%;height:180px;background:linear-gradient(135deg,#f0f0f0,#e0e0e0);display:flex;align-items:center;justify-content:center;color:#999;font-size:14px;"><i data-lucide="cloud-download" style="width:24px;height:24px;margin-right:8px;"></i> Đang tải từ đám mây...</div>`;
+
         if (item.analyzed) {
             html += `
             <div class="library-card">
-                <img src="${item.img}" alt="${item.name}">
+                ${imgTag}
                 <div class="library-card-content" style="position: relative;">
                     <h3>${item.name}</h3>
                     <div class="library-card-stats" style="margin-bottom: 8px;">
@@ -1725,7 +1738,7 @@ function renderLibraryGrid() {
         } else {
             html += `
             <div class="library-card" id="lib-card-${item.id}">
-                <img src="${item.img}" alt="Chưa phân tích">
+                ${imgTag}
                 <div class="library-card-content" style="position: relative;">
                     <button class="btn-analyze" onclick="analyzeLibraryImage('${item.id}')" id="btn-analyze-${item.id}" style="margin-right: 28px;">
                         <i data-lucide="scan"></i> Phân tích AI
