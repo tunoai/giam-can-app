@@ -1234,8 +1234,26 @@ function initMenuGenerator() {
     const btnGen = document.getElementById('btn-generate-menu');
     if (!btnGen) return;
 
-    btnGen.addEventListener('click', async () => {
-        if (!confirm("Tạo thực đơn AI mới dựa trên calo mục tiêu của bạn? Mọi thực đơn 3 ngày cũ sẽ bị ghi đè.")) return;
+    btnGen.addEventListener('click', () => {
+        // Show custom confirm modal instead of browser confirm()
+        const modal = document.getElementById('menu-confirm-modal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+
+        // Remove old listeners
+        const btnCancel = document.getElementById('btn-menu-cancel');
+        const btnConfirm = document.getElementById('btn-menu-confirm');
+        const newCancel = btnCancel.cloneNode(true);
+        const newConfirm = btnConfirm.cloneNode(true);
+        btnCancel.parentNode.replaceChild(newCancel, btnCancel);
+        btnConfirm.parentNode.replaceChild(newConfirm, btnConfirm);
+
+        newCancel.addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+        newConfirm.addEventListener('click', async () => {
+            modal.classList.add('hidden');
 
         btnGen.disabled = true;
         btnGen.innerHTML = `<span class="spinner-small"></span> AI đang lên thực đơn...`;
@@ -1276,7 +1294,8 @@ function initMenuGenerator() {
             btnGen.innerHTML = `<i data-lucide="sparkles"></i> Tạo thực đơn mới`;
             if (window.lucide) window.lucide.createIcons();
         }
-    });
+        });  // end newConfirm click
+    });  // end btnGen click
 }
 
 async function generateMenuWithGemini(targetKcal) {

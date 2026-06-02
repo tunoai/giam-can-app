@@ -1057,6 +1057,23 @@
         </div>
     </div>
 
+    <!-- Generate Menu Confirm Modal -->
+    <div id="menu-confirm-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px; text-align: center; border-radius: 20px; padding: 32px; animation: modalPop 0.3s ease;">
+            <div style="background: linear-gradient(135deg, #FF6B00, #FF8A3D); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 12px rgba(255,107,0,0.3);">
+                <i data-lucide="sparkles" style="width: 28px; height: 28px; color: white;"></i>
+            </div>
+            <h3 style="font-size: 19px; margin-bottom: 8px; color: var(--text-color);">Tạo thực đơn AI mới?</h3>
+            <p style="color: var(--text-light); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">AI sẽ tạo thực đơn <strong>3 ngày</strong> mới dựa trên mục tiêu calo của bạn.<br>Thực đơn cũ sẽ bị thay thế.</p>
+            <div style="display: flex; gap: 12px;">
+                <button id="btn-menu-cancel" class="btn btn-outline-sm" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;">Hủy bỏ</button>
+                <button id="btn-menu-confirm" class="btn btn-primary" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;">
+                    <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i> Tạo ngay
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- API Key Settings Modal -->
     <div id="apikey-modal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 480px; border-radius: 20px; padding: 32px; position: relative;">
