@@ -194,17 +194,7 @@ function loadState() {
 
     // Load cached images from IndexedDB immediately (fast, local)
     loadImagesFromCache(state.library).then(() => {
-        // Also load missing images from Firebase
-        const missing = (state.library || []).filter(item => !item.img || item.img.length <= 10);
-        if (missing.length > 0) {
-            Promise.all(missing.map(item => getImageFromFirebaseDB(item.id).then(b64 => {
-                if (b64) { item.img = b64; saveImageToCache(item.id, b64); }
-            }))).then(() => {
-                if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
-            });
-        } else {
-            if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
-        }
+        if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
     });
 
     if (db) {
@@ -2353,7 +2343,7 @@ function renderLibraryGrid() {
     container.innerHTML = (emptyState ? emptyState.outerHTML : '') + html;
     if(window.lucide) window.lucide.createIcons();
 
-    // Retry loading missing images from IndexedDB cache, then Firebase
+    // Retry loading missing images from IndexedDB cache, then Cloud Storage
     const loadingPlaceholders = container.querySelectorAll('.library-img-loading');
     if (loadingPlaceholders.length > 0) {
         loadingPlaceholders.forEach(placeholder => {
@@ -2368,23 +2358,27 @@ function renderLibraryGrid() {
                         img.alt = (item && item.name) || 'Ảnh món ăn';
                         placeholder.replaceWith(img);
                     } else {
-                        // IndexedDB empty → try Firebase
+                        // IndexedDB empty → try Firebase Cloud Storage
                         placeholder.innerHTML = '<span class="spinner-small" style="margin-right:8px;"></span> Đang tải từ cloud...';
-                        getImageFromFirebaseDB(itemId).then(firebaseImg => {
-                            if (firebaseImg) {
+                        if (storage) {
+                            storage.ref(`library/${itemId}.jpg`).getDownloadURL().then(url => {
                                 const item = state.library.find(i => i.id === itemId);
-                                if (item) item.img = firebaseImg;
-                                // Cache locally for next time
-                                saveImageToCache(itemId, firebaseImg);
+                                if (item) {
+                                    item.img = url;
+                                    saveState(); // update state with the new URL
+                                }
                                 const img = document.createElement('img');
-                                img.src = firebaseImg;
+                                img.src = url;
                                 img.alt = (item && item.name) || 'Ảnh món ăn';
                                 placeholder.replaceWith(img);
-                            } else {
+                            }).catch(() => {
                                 placeholder.innerHTML = '<i data-lucide="image-off" style="width:24px;height:24px;margin-right:8px;"></i> Ảnh không khả dụng';
                                 if(window.lucide) window.lucide.createIcons();
-                            }
-                        });
+                            });
+                        } else {
+                            placeholder.innerHTML = '<i data-lucide="image-off" style="width:24px;height:24px;margin-right:8px;"></i> Lỗi Cloud';
+                            if(window.lucide) window.lucide.createIcons();
+                        }
                     }
                 });
             }
