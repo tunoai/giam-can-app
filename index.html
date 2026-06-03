@@ -278,6 +278,22 @@
 
                     <!-- Low Grid Previews -->
                     <div class="dashboard-low-grid">
+                        <!-- Daily Check-in Card -->
+                        <div class="preview-card-item flex-col justify-between" id="preview-checkin">
+                            <div class="preview-header">
+                                <h3>Check-in hôm nay</h3>
+                                <span class="checkin-streak-badge" id="dash-streak-badge">🔥 18 ngày</span>
+                            </div>
+                            <div class="checkin-box-body" id="dash-checkin-body">
+                                <div class="checkin-icon-large text-orange" id="dash-checkin-icon">
+                                    <i data-lucide="alert-triangle"></i>
+                                </div>
+                                <h4 class="checkin-title" id="dash-checkin-title">Bạn chưa check-in hôm nay!</h4>
+                                <p class="checkin-desc" id="dash-checkin-desc">Hãy check-in để duy trì chuỗi mục tiêu giảm cân.</p>
+                            </div>
+                            <button class="btn btn-primary w-full" id="btn-checkin-now-prev">Check-in ngay</button>
+                        </div>
+
                         <!-- Meal Plan Box -->
                         <div class="preview-card-item" id="preview-dinh-duong">
                             <div class="preview-header">
@@ -299,98 +315,6 @@
                                 <p class="text-sub">Mục tiêu mỗi ngày</p>
                                 <button class="btn btn-light-sm w-full" id="btn-adjust-target-prev">Điều chỉnh mục tiêu</button>
                             </div>
-                        </div>
-
-                        <!-- Gram Menu Box -->
-                        <div class="preview-card-item" id="preview-thuc-don">
-                            <div class="preview-header">
-                                <h3>Thực đơn theo gam</h3>
-                                <a href="#" class="preview-link" data-link="thuc-don">Xem thêm <i data-lucide="chevron-right"></i></a>
-                            </div>
-                            <div class="gram-meal-list">
-                                <span class="meal-time-tag">Bữa trưa</span>
-                                <div class="gram-meal-item">
-                                    <div class="meal-img-placeholder"><i data-lucide="drumstick"></i></div>
-                                    <div class="meal-info">
-                                        <span class="meal-title">Ức gà nướng</span>
-                                        <span class="meal-sub">150g • 250 kcal</span>
-                                    </div>
-                                </div>
-                                <div class="gram-meal-item">
-                                    <div class="meal-img-placeholder"><i data-lucide="cookie"></i></div>
-                                    <div class="meal-info">
-                                        <span class="meal-title">Cơm gạo lứt</span>
-                                        <span class="meal-sub">150g • 165 kcal</span>
-                                    </div>
-                                </div>
-                                <div class="gram-meal-item">
-                                    <div class="meal-img-placeholder"><i data-lucide="leaf"></i></div>
-                                    <div class="meal-info">
-                                        <span class="meal-title">Rau luộc</span>
-                                        <span class="meal-sub">200g • 60 kcal</span>
-                                    </div>
-                                </div>
-                                <div class="gram-meal-item">
-                                    <div class="meal-img-placeholder"><i data-lucide="soup"></i></div>
-                                    <div class="meal-info">
-                                        <span class="meal-title">Canh bí đỏ</span>
-                                        <span class="meal-sub">200g • 80 kcal</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="btn btn-light-sm w-full mt-auto" id="btn-view-all-meals-prev">Xem thực đơn đầy đủ</button>
-                        </div>
-
-                        <!-- Food Diary Box -->
-                        <div class="preview-card-item" id="preview-nhat-ky">
-                            <div class="preview-header">
-                                <h3>Nhật ký ăn uống</h3>
-                                <a href="#" class="preview-link" data-link="nhat-ky">Xem thêm <i data-lucide="chevron-right"></i></a>
-                            </div>
-                            <div class="preview-diary-summary">
-                                <p class="kcal-status-text">Calo đã nạp: <strong>1.350 / 1.800 kcal</strong></p>
-                                <ul class="diary-check-list" id="dash-diary-list">
-                                    <li>
-                                        <div class="custom-checkbox checked"><i data-lucide="check"></i></div>
-                                        <span>Bữa sáng</span>
-                                        <span class="kcal-badge">350 kcal</span>
-                                    </li>
-                                    <li>
-                                        <div class="custom-checkbox checked"><i data-lucide="check"></i></div>
-                                        <span>Bữa trưa</span>
-                                        <span class="kcal-badge">500 kcal</span>
-                                    </li>
-                                    <li>
-                                        <div class="custom-checkbox"><i data-lucide="check"></i></div>
-                                        <span>Bữa tối</span>
-                                        <span class="kcal-badge">400 kcal</span>
-                                    </li>
-                                    <li>
-                                        <div class="custom-checkbox checked"><i data-lucide="check"></i></div>
-                                        <span>Bữa phụ</span>
-                                        <span class="kcal-badge">100 kcal</span>
-                                    </li>
-                                </ul>
-                            </div>
-                            <button class="btn btn-light-sm w-full mt-auto" id="btn-add-food-prev">
-                                <i data-lucide="plus"></i> Thêm món ăn
-                            </button>
-                        </div>
-
-                        <!-- Daily Check-in Card -->
-                        <div class="preview-card-item flex-col justify-between" id="preview-checkin">
-                            <div class="preview-header">
-                                <h3>Check-in hôm nay</h3>
-                                <span class="checkin-streak-badge" id="dash-streak-badge">🔥 18 ngày</span>
-                            </div>
-                            <div class="checkin-box-body" id="dash-checkin-body">
-                                <div class="checkin-icon-large text-orange" id="dash-checkin-icon">
-                                    <i data-lucide="alert-triangle"></i>
-                                </div>
-                                <h4 class="checkin-title" id="dash-checkin-title">Bạn chưa check-in hôm nay!</h4>
-                                <p class="checkin-desc" id="dash-checkin-desc">Hãy check-in để duy trì chuỗi mục tiêu giảm cân.</p>
-                            </div>
-                            <button class="btn btn-primary w-full" id="btn-checkin-now-prev">Check-in ngay</button>
                         </div>
                     </div>
 
@@ -1033,6 +957,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
 
     <!-- Main JavaScript App Logic -->
-    <script src="app.js"></script>
+    <script src="app.js?v=6"></script>
 </body>
 </html>
