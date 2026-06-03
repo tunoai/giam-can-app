@@ -2621,7 +2621,9 @@ async function analyzeImageWithGemini(base64Image) {
     // Convert URL to base64 if it's an http link (Firebase Storage)
     if (base64Image.startsWith('http')) {
         try {
-            const response = await fetch(base64Image);
+            // Use corsproxy.io to bypass CORS restrictions
+            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(base64Image);
+            const response = await fetch(proxyUrl);
             const blob = await response.blob();
             const dataUrl = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -2631,7 +2633,7 @@ async function analyzeImageWithGemini(base64Image) {
             });
             data = dataUrl;
         } catch (e) {
-            throw new Error("Không thể tải ảnh từ Cloud để phân tích. Lỗi mạng hoặc CORS.");
+            throw new Error("Không thể tải ảnh từ Cloud để phân tích do lỗi CORS. Vui lòng thử lại sau.");
         }
     }
 
