@@ -85,27 +85,33 @@ const firebaseConfig = {
 };
 
 let db = null;
+let storage = null;
 if (typeof firebase !== 'undefined') {
     firebase.initializeApp(firebaseConfig);
     db = firebase.database();
+    try {
+        storage = firebase.storage();
+    } catch(e) { console.warn("Firebase Storage init error:", e); }
 }
 
-// --- Firebase Image Sync (lưu ảnh vào Realtime DB, miễn phí) ---
-function saveImageToFirebase(id, base64) {
-    if (!db) return Promise.resolve();
-    return db.ref('shared_state/library_images/' + id).set(base64).catch(err => {
-        console.warn('Firebase image save error:', err);
-    });
+// --- Firebase Cloud Storage Sync ---
+async function uploadImageToStorage(id, base64) {
+    if (!storage) return null;
+    try {
+        const ref = storage.ref(`library/${id}.jpg`);
+        await ref.putString(base64, 'data_url');
+        return await ref.getDownloadURL();
+    } catch (err) {
+        console.warn('Storage upload error:', err);
+        return null;
+    }
 }
 
-function getImageFromFirebaseDB(id) {
-    if (!db) return Promise.resolve(null);
-    return db.ref('shared_state/library_images/' + id).once('value').then(snap => snap.val() || null).catch(() => null);
-}
-
-function deleteImageFromFirebase(id) {
-    if (!db) return Promise.resolve();
-    return db.ref('shared_state/library_images/' + id).remove().catch(() => {});
+async function deleteImageFromStorage(id) {
+    if (!storage) return;
+    try {
+        await storage.ref(`library/${id}.jpg`).delete();
+    } catch (err) {}
 }
 
 let isSyncingFromFirebase = false;
@@ -2007,17 +2013,26 @@ function initSyncButton() {
                 return;
             }
 
-            // 4. Upload each image to Firebase
+            // 4. Upload each image to Firebase Storage
             let uploadCount = 0;
             let errors = [];
             for (const item of imagesWithData) {
-                try {
-                    await saveImageToFirebase(item.id, item.img);
-                    uploadCount++;
-                } catch (e) {
-                    errors.push(item.id + ': ' + (e.message || e));
+                // Chỉ upload nếu img đang là base64 (chưa phải url cloud)
+                if (item.img && item.img.startsWith('data:image')) {
+                    try {
+                        const url = await uploadImageToStorage(item.id, item.img);
+                        if (url) {
+                            item.img = url;
+                            uploadCount++;
+                        }
+                    } catch (e) {
+                        errors.push(item.id + ': ' + (e.message || e));
+                    }
                 }
             }
+            
+            // Lưu lại state với các URL mới
+            if (uploadCount > 0) saveState();
 
             btn.disabled = false;
             btn.innerHTML = '<i data-lucide="refresh-cw"></i> <span>Đồng bộ dữ liệu</span>';
@@ -2421,8 +2436,8 @@ window.deleteLibraryItem = function(id) {
     
     newBtnDelete.addEventListener('click', () => {
         modal.classList.add('hidden');
-        // Xóa ảnh khỏi Firebase
-        deleteImageFromFirebase(id);
+        // Xóa ảnh khỏi Firebase Storage
+        deleteImageFromStorage(id);
         state.library = state.library.filter(i => i.id !== id);
         saveState();
         renderLibraryGrid();
