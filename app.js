@@ -207,74 +207,28 @@ function loadState() {
             if (data) {
                 isSyncingFromFirebase = true;
                 state = data;
-                // Remove library_images from state (stored separately in Firebase)
-                delete state.library_images;
+                delete state.library_images; // cleanup if exists
                 if (state.user && state.user.name === "Nguyễn Mai") {
                     state.user.name = "Tùng Chu";
                     state.user.avatar = "tung_chu_avatar.png";
                 }
-                // Save lightweight state (no images) to localStorage
+
+                // Save to localStorage (without images, 5MB limit)
                 try {
-                    const lightState = JSON.parse(JSON.stringify(state));
-                    if (lightState.library && lightState.library.length > 0) {
-                        lightState.library = lightState.library.map(item => {
-                            const copy = Object.assign({}, item);
-                            delete copy.img;
-                            return copy;
-                        });
-                    }
-                    localStorage.setItem('fitlife_state', JSON.stringify(lightState));
-                } catch (e) {
-                    console.warn("Lỗi lưu localStorage:", e);
+                    localStorage.setItem('fitlife_state', JSON.stringify(createLightState()));
+                } catch (e) {}
+
+                // Cache images locally for offline use
+                if (state.library && state.library.length > 0) {
+                    saveAllImagesToCache(state.library);
                 }
 
-                // If Firebase still has images from before migration, cache them first
-                const hasFirebaseImages = state.library && state.library.some(item => item.img && item.img.length > 10);
-                const afterCacheReady = () => {
-                    // Now load images from IndexedDB cache for items that don't have images
-                    loadImagesFromCache(state.library).then(() => {
-                        // For items still missing images, try loading from Firebase
-                        const missingItems = (state.library || []).filter(item => !item.img || item.img.length <= 10);
-                        const firebaseLoads = missingItems.map(item => {
-                            return getImageFromFirebaseDB(item.id).then(base64 => {
-                                if (base64) {
-                                    item.img = base64;
-                                    // Cache locally for next time
-                                    saveImageToCache(item.id, base64);
-                                }
-                            });
-                        });
-                        return Promise.all(firebaseLoads);
-                    }).then(() => {
-                        updateUI();
-                        try { if (weightChart) renderWeightChart(); } catch(e) {}
-                        if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
+                // Update UI
+                updateUI();
+                try { if (weightChart) renderWeightChart(); } catch(e) {}
+                if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
 
-                        const diaryScreen = document.getElementById('screen-thuc-don');
-                        if (diaryScreen && !diaryScreen.classList.contains('hidden')) {
-                            const activeTab = document.querySelector('.day-tab.active');
-                            if (activeTab) {
-                                const dayText = activeTab.querySelector('strong').innerText;
-                                const dayKey = dayText.toLowerCase();
-                                if (typeof renderDiary === 'function') renderDiary(dayKey);
-                            }
-                        }
-                        
-                        // If Firebase had images, re-save to strip them out (migration)
-                        if (hasFirebaseImages) {
-                            saveStateToFirebase();
-                        }
-                        
-                        isSyncingFromFirebase = false;
-                    });
-                };
-
-                if (hasFirebaseImages) {
-                    // Save Firebase images to IndexedDB cache first, then proceed
-                    saveAllImagesToCache(state.library).then(afterCacheReady);
-                } else {
-                    afterCacheReady();
-                }
+                isSyncingFromFirebase = false;
             } else {
                 if (!isSyncingFromFirebase) {
                     saveStateToFirebase();
@@ -284,7 +238,7 @@ function loadState() {
     }
 }
 
-// Helper: create lightweight state without images for storage
+// Helper: create lightweight state without images for localStorage (5MB limit)
 function createLightState() {
     const lightState = JSON.parse(JSON.stringify(state));
     if (lightState.library && lightState.library.length > 0) {
@@ -297,23 +251,20 @@ function createLightState() {
     return lightState;
 }
 
-// Helper: save state to Firebase without images (use update to preserve library_images)
+// Save FULL state (with images) to Firebase - simple and reliable
 function saveStateToFirebase() {
     if (db && !isSyncingFromFirebase) {
-        const lightState = createLightState();
-        // Use update instead of set to preserve shared_state/library_images
-        const updates = {};
-        for (const key in lightState) {
-            updates[key] = lightState[key];
-        }
-        db.ref('shared_state').update(updates).catch(err => {
+        const fullState = JSON.parse(JSON.stringify(state));
+        // Remove library_images if it accidentally got into state
+        delete fullState.library_images;
+        db.ref('shared_state').set(fullState).catch(err => {
             console.error("Lỗi lưu Firebase:", err);
         });
     }
 }
 
 function saveState() {
-    // Save to localStorage WITHOUT base64 image data (to avoid 5MB limit)
+    // Save to localStorage WITHOUT images (5MB limit)
     try {
         const lightState = createLightState();
         localStorage.setItem('fitlife_state', JSON.stringify(lightState));
@@ -321,11 +272,11 @@ function saveState() {
         console.warn("Lỗi lưu localStorage:", e);
     }
 
-    // Cache images to IndexedDB (fast local storage, 50MB+)
+    // Cache images to IndexedDB (local backup)
     saveAllImagesToCache(state.library);
 
     updateUI();
-    // Save lightweight state (no images) to Firebase to avoid size limits
+    // Save FULL state (with images) to Firebase
     saveStateToFirebase();
 }
 
