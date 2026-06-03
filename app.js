@@ -2033,41 +2033,55 @@ function initSyncButton() {
 
     btn.addEventListener('click', async () => {
         btn.disabled = true;
-        const icon = btn.querySelector('i');
-        icon.style.animation = 'rotate 1s infinite linear';
-        btn.querySelector('span').innerText = 'Đang đồng bộ...';
+        try {
+            btn.innerHTML = '<span class="spinner-small"></span> <span>Đang đồng bộ...</span>';
+        } catch(e) {}
 
         try {
             // 1. Save state to Firebase
             saveStateToFirebase();
 
-            // 2. Load images from IndexedDB cache first (they may not be in memory)
+            // 2. Load images from IndexedDB cache first
             const library = state.library || [];
             await loadImagesFromCache(library);
 
-            // 3. Upload all library images that have base64 data to Firebase
+            // 3. Count images available
             const imagesWithData = library.filter(item => item.img && item.img.length > 10);
-            let uploadCount = 0;
+            
+            if (imagesWithData.length === 0) {
+                alert("Không tìm thấy ảnh nào trong thư viện để đồng bộ. Số item trong thư viện: " + library.length);
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="refresh-cw"></i> <span>Đồng bộ dữ liệu</span>';
+                if (window.lucide) window.lucide.createIcons();
+                return;
+            }
 
+            // 4. Upload each image to Firebase
+            let uploadCount = 0;
+            let errors = [];
             for (const item of imagesWithData) {
                 try {
                     await saveImageToFirebase(item.id, item.img);
                     uploadCount++;
                 } catch (e) {
-                    console.warn('Sync image failed for', item.id, e);
+                    errors.push(item.id + ': ' + (e.message || e));
                 }
             }
 
-            icon.style.animation = '';
             btn.disabled = false;
-            btn.querySelector('span').innerText = 'Đồng bộ dữ liệu';
-            showNotification("Đồng bộ thành công", `Đã đồng bộ dữ liệu và ${uploadCount} ảnh lên Firebase!`, "success");
+            btn.innerHTML = '<i data-lucide="refresh-cw"></i> <span>Đồng bộ dữ liệu</span>';
+            if (window.lucide) window.lucide.createIcons();
+
+            if (errors.length > 0) {
+                alert("Đồng bộ: " + uploadCount + "/" + imagesWithData.length + " ảnh thành công.\nLỗi: " + errors.join(', '));
+            } else {
+                alert("✅ Đồng bộ thành công! Đã upload " + uploadCount + " ảnh lên Firebase.\nBây giờ mở điện thoại và reload trang.");
+            }
         } catch (err) {
-            console.error("Lỗi đồng bộ:", err);
-            icon.style.animation = '';
+            alert("❌ Lỗi đồng bộ: " + (err.message || err));
             btn.disabled = false;
-            btn.querySelector('span').innerText = 'Đồng bộ dữ liệu';
-            showNotification("Lỗi", "Không thể đồng bộ: " + err.message, "error");
+            btn.innerHTML = '<i data-lucide="refresh-cw"></i> <span>Đồng bộ dữ liệu</span>';
+            if (window.lucide) window.lucide.createIcons();
         }
     });
 }
