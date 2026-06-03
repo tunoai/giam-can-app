@@ -90,6 +90,24 @@ if (typeof firebase !== 'undefined') {
     db = firebase.database();
 }
 
+// --- Firebase Image Sync (lưu ảnh vào Realtime DB, miễn phí) ---
+function saveImageToFirebase(id, base64) {
+    if (!db) return Promise.resolve();
+    return db.ref('library_images/' + id).set(base64).catch(err => {
+        console.warn('Firebase image save error:', err);
+    });
+}
+
+function getImageFromFirebaseDB(id) {
+    if (!db) return Promise.resolve(null);
+    return db.ref('library_images/' + id).once('value').then(snap => snap.val() || null).catch(() => null);
+}
+
+function deleteImageFromFirebase(id) {
+    if (!db) return Promise.resolve();
+    return db.ref('library_images/' + id).remove().catch(() => {});
+}
+
 let isSyncingFromFirebase = false;
 let state = {};
 let weightChart = null;
@@ -170,7 +188,17 @@ function loadState() {
 
     // Load cached images from IndexedDB immediately (fast, local)
     loadImagesFromCache(state.library).then(() => {
-        if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
+        // Also load missing images from Firebase
+        const missing = (state.library || []).filter(item => !item.img || item.img.length <= 10);
+        if (missing.length > 0) {
+            Promise.all(missing.map(item => getImageFromFirebaseDB(item.id).then(b64 => {
+                if (b64) { item.img = b64; saveImageToCache(item.id, b64); }
+            }))).then(() => {
+                if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
+            });
+        } else {
+            if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
+        }
     });
 
     if (db) {
@@ -203,6 +231,19 @@ function loadState() {
                 const afterCacheReady = () => {
                     // Now load images from IndexedDB cache for items that don't have images
                     loadImagesFromCache(state.library).then(() => {
+                        // For items still missing images, try loading from Firebase
+                        const missingItems = (state.library || []).filter(item => !item.img || item.img.length <= 10);
+                        const firebaseLoads = missingItems.map(item => {
+                            return getImageFromFirebaseDB(item.id).then(base64 => {
+                                if (base64) {
+                                    item.img = base64;
+                                    // Cache locally for next time
+                                    saveImageToCache(item.id, base64);
+                                }
+                            });
+                        });
+                        return Promise.all(firebaseLoads);
+                    }).then(() => {
                         updateUI();
                         try { if (weightChart) renderWeightChart(); } catch(e) {}
                         if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
@@ -2195,6 +2236,8 @@ function initLibrary() {
                                 kcal: 0
                             };
                             state.library.push(newItem);
+                            // Upload ảnh lên Firebase để đồng bộ giữa các thiết bị
+                            saveImageToFirebase(newItem.id, compressedBase64);
                             saveState();
                             renderLibraryGrid();
                             uploadInput.value = '';
@@ -2365,6 +2408,8 @@ window.deleteLibraryItem = function(id) {
     
     newBtnDelete.addEventListener('click', () => {
         modal.classList.add('hidden');
+        // Xóa ảnh khỏi Firebase
+        deleteImageFromFirebase(id);
         state.library = state.library.filter(i => i.id !== id);
         saveState();
         renderLibraryGrid();
