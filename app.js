@@ -2377,7 +2377,7 @@ function renderLibraryGrid() {
     container.innerHTML = (emptyState ? emptyState.outerHTML : '') + html;
     if(window.lucide) window.lucide.createIcons();
 
-    // Retry loading missing images from IndexedDB cache
+    // Retry loading missing images from IndexedDB cache, then Firebase
     const loadingPlaceholders = container.querySelectorAll('.library-img-loading');
     if (loadingPlaceholders.length > 0) {
         loadingPlaceholders.forEach(placeholder => {
@@ -2392,8 +2392,23 @@ function renderLibraryGrid() {
                         img.alt = (item && item.name) || 'Ảnh món ăn';
                         placeholder.replaceWith(img);
                     } else {
-                        placeholder.innerHTML = '<i data-lucide="image-off" style="width:24px;height:24px;margin-right:8px;"></i> Ảnh không khả dụng';
-                        if(window.lucide) window.lucide.createIcons();
+                        // IndexedDB empty → try Firebase
+                        placeholder.innerHTML = '<span class="spinner-small" style="margin-right:8px;"></span> Đang tải từ cloud...';
+                        getImageFromFirebaseDB(itemId).then(firebaseImg => {
+                            if (firebaseImg) {
+                                const item = state.library.find(i => i.id === itemId);
+                                if (item) item.img = firebaseImg;
+                                // Cache locally for next time
+                                saveImageToCache(itemId, firebaseImg);
+                                const img = document.createElement('img');
+                                img.src = firebaseImg;
+                                img.alt = (item && item.name) || 'Ảnh món ăn';
+                                placeholder.replaceWith(img);
+                            } else {
+                                placeholder.innerHTML = '<i data-lucide="image-off" style="width:24px;height:24px;margin-right:8px;"></i> Ảnh không khả dụng';
+                                if(window.lucide) window.lucide.createIcons();
+                            }
+                        });
                     }
                 });
             }
