@@ -2041,8 +2041,11 @@ function initSyncButton() {
             // 1. Save state to Firebase
             saveStateToFirebase();
 
-            // 2. Upload all library images that have base64 data to Firebase
+            // 2. Load images from IndexedDB cache first (they may not be in memory)
             const library = state.library || [];
+            await loadImagesFromCache(library);
+
+            // 3. Upload all library images that have base64 data to Firebase
             const imagesWithData = library.filter(item => item.img && item.img.length > 10);
             let uploadCount = 0;
 
