@@ -211,6 +211,12 @@ function loadState() {
                     state.library = [];
                 }
                 
+                // DIAGNOSTIC NOTIFICATION
+                try {
+                    const libCount = state.library ? state.library.length : 0;
+                    showNotification("Firebase Sync", `Đã tải dữ liệu từ Cloud. Số ảnh: ${libCount}`, "info");
+                } catch(e) {}
+                
                 if (state.history && !Array.isArray(state.history)) {
                     state.history = Object.values(state.history).filter(Boolean);
                 } else if (!state.history) {
