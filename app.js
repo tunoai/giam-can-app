@@ -2024,18 +2024,41 @@ function initSyncButton() {
     const btn = document.getElementById('btn-sync-data');
     if (!btn) return;
 
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
         btn.disabled = true;
         const icon = btn.querySelector('i');
         icon.style.animation = 'rotate 1s infinite linear';
         btn.querySelector('span').innerText = 'Đang đồng bộ...';
 
-        setTimeout(() => {
+        try {
+            // 1. Save state to Firebase
+            saveStateToFirebase();
+
+            // 2. Upload all library images that have base64 data to Firebase
+            const library = state.library || [];
+            const imagesWithData = library.filter(item => item.img && item.img.length > 10);
+            let uploadCount = 0;
+
+            for (const item of imagesWithData) {
+                try {
+                    await saveImageToFirebase(item.id, item.img);
+                    uploadCount++;
+                } catch (e) {
+                    console.warn('Sync image failed for', item.id, e);
+                }
+            }
+
             icon.style.animation = '';
             btn.disabled = false;
             btn.querySelector('span').innerText = 'Đồng bộ dữ liệu';
-            alert("Đã đồng bộ dữ liệu calo, nước uống và cân nặng lên đám mây AI thành công!");
-        }, 1200);
+            showNotification("Đồng bộ thành công", `Đã đồng bộ dữ liệu và ${uploadCount} ảnh lên Firebase!`, "success");
+        } catch (err) {
+            console.error("Lỗi đồng bộ:", err);
+            icon.style.animation = '';
+            btn.disabled = false;
+            btn.querySelector('span').innerText = 'Đồng bộ dữ liệu';
+            showNotification("Lỗi", "Không thể đồng bộ: " + err.message, "error");
+        }
     });
 }
 
