@@ -93,19 +93,19 @@ if (typeof firebase !== 'undefined') {
 // --- Firebase Image Sync (lưu ảnh vào Realtime DB, miễn phí) ---
 function saveImageToFirebase(id, base64) {
     if (!db) return Promise.resolve();
-    return db.ref('library_images/' + id).set(base64).catch(err => {
+    return db.ref('shared_state/library_images/' + id).set(base64).catch(err => {
         console.warn('Firebase image save error:', err);
     });
 }
 
 function getImageFromFirebaseDB(id) {
     if (!db) return Promise.resolve(null);
-    return db.ref('library_images/' + id).once('value').then(snap => snap.val() || null).catch(() => null);
+    return db.ref('shared_state/library_images/' + id).once('value').then(snap => snap.val() || null).catch(() => null);
 }
 
 function deleteImageFromFirebase(id) {
     if (!db) return Promise.resolve();
-    return db.ref('library_images/' + id).remove().catch(() => {});
+    return db.ref('shared_state/library_images/' + id).remove().catch(() => {});
 }
 
 let isSyncingFromFirebase = false;
@@ -207,6 +207,8 @@ function loadState() {
             if (data) {
                 isSyncingFromFirebase = true;
                 state = data;
+                // Remove library_images from state (stored separately in Firebase)
+                delete state.library_images;
                 if (state.user && state.user.name === "Nguyễn Mai") {
                     state.user.name = "Tùng Chu";
                     state.user.avatar = "tung_chu_avatar.png";
@@ -295,11 +297,16 @@ function createLightState() {
     return lightState;
 }
 
-// Helper: save state to Firebase without images
+// Helper: save state to Firebase without images (use update to preserve library_images)
 function saveStateToFirebase() {
     if (db && !isSyncingFromFirebase) {
         const lightState = createLightState();
-        db.ref('shared_state').set(lightState).catch(err => {
+        // Use update instead of set to preserve shared_state/library_images
+        const updates = {};
+        for (const key in lightState) {
+            updates[key] = lightState[key];
+        }
+        db.ref('shared_state').update(updates).catch(err => {
             console.error("Lỗi lưu Firebase:", err);
         });
     }
