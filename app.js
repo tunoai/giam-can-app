@@ -42,18 +42,7 @@ const DEFAULT_STATE = {
             1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2
         ]
     },
-    water: {
-        current: 1.5, // Liters
-        target: 2.5,
-        history: [
-            { time: "07:30", type: "water", vol: 250 },
-            { time: "09:15", type: "coffee", vol: 150 },
-            { time: "10:30", type: "water", vol: 250 },
-            { time: "12:00", type: "water", vol: 250 },
-            { time: "13:30", type: "tea", vol: 200 },
-            { time: "14:15", type: "water", vol: 400 }
-        ]
-    },
+
     nutrition: {
         kcalTarget: 1800,
         proteinTarget: 140,
@@ -333,7 +322,7 @@ function initNavigation() {
     });
 
     // Sub-card navigation in Dashboard previews
-    document.querySelectorAll('.preview-link, .gram-meal-list, #preview-dinh-duong button, #preview-thuc-don button, #preview-nhat-ky button, #preview-nuoc button').forEach(el => {
+    document.querySelectorAll('.preview-link, .gram-meal-list, #preview-dinh-duong button, #preview-thuc-don button, #preview-nhat-ky button').forEach(el => {
         el.addEventListener('click', (e) => {
             let target = '';
             if (el.classList.contains('preview-link')) {
@@ -344,10 +333,6 @@ function initNavigation() {
                 target = 'thuc-don';
             } else if (el.id === 'btn-add-food-prev') {
                 target = 'nhat-ky';
-            } else if (el.closest('#preview-nuoc')) {
-                // If it is water quick buttons, don't redirect
-                if (e.target.closest('.water-quick-buttons')) return;
-                target = 'nuoc';
             } else {
                 return;
             }
@@ -440,8 +425,8 @@ function renderWeightChart() {
                 },
                 tooltip: {
                     backgroundColor: '#1E293B',
-                    titleFont: { family: 'Outfit', weight: 'bold' },
-                    bodyFont: { family: 'Plus Jakarta Sans' },
+                    titleFont: { family: 'Arial', weight: 'bold' },
+                    bodyFont: { family: 'Arial' },
                     padding: 12,
                     cornerRadius: 8,
                     callbacks: {
@@ -459,7 +444,7 @@ function renderWeightChart() {
                     },
                     ticks: {
                         color: '#64748B',
-                        font: { family: 'Plus Jakarta Sans', size: 11 }
+                        font: { family: 'Arial', size: 11 }
                     }
                 },
                 x: {
@@ -468,7 +453,7 @@ function renderWeightChart() {
                     },
                     ticks: {
                         color: '#64748B',
-                        font: { family: 'Plus Jakarta Sans', size: 11 }
+                        font: { family: 'Arial', size: 11 }
                     }
                 }
             }
@@ -606,50 +591,7 @@ function updateUI() {
     const diaryBar = document.getElementById('diary-progress-bar');
     if (diaryBar) diaryBar.style.width = `${kcalPercent}%`;
 
-    // Dynamic warning text block
-    const warningStatusEl = document.getElementById('dash-warning-status');
-    const btnCheckinPrev = document.getElementById('btn-checkin-now-prev');
-    if (todayChecked) {
-        if (warningStatusEl) {
-            warningStatusEl.innerText = "Hôm nay bạn đã check-in!";
-            warningStatusEl.className = "warning-title text-green";
-            const bodyEl = warningStatusEl.closest('.warning-box-body');
-            if (bodyEl) {
-                const iconEl = bodyEl.querySelector('.warning-icon-large');
-                if (iconEl) {
-                    iconEl.className = "warning-icon-large text-green";
-                    const iEl = iconEl.querySelector('i');
-                    if (iEl) iEl.setAttribute('data-lucide', 'check-circle');
-                }
-            }
-        }
-        if (btnCheckinPrev) {
-            btnCheckinPrev.innerText = "Đã check-in";
-            btnCheckinPrev.disabled = true;
-            btnCheckinPrev.style.opacity = "0.6";
-        }
-        safeText('val-weight-update-time', "Cập nhật: Mới xong");
-    } else {
-        if (warningStatusEl) {
-            warningStatusEl.innerText = "Bạn chưa check-in hôm nay!";
-            warningStatusEl.className = "warning-title text-orange";
-            const bodyEl = warningStatusEl.closest('.warning-box-body');
-            if (bodyEl) {
-                const iconEl = bodyEl.querySelector('.warning-icon-large');
-                if (iconEl) {
-                    iconEl.className = "warning-icon-large text-orange";
-                    const iEl = iconEl.querySelector('i');
-                    if (iEl) iEl.setAttribute('data-lucide', 'alert-triangle');
-                }
-            }
-        }
-        if (btnCheckinPrev) {
-            btnCheckinPrev.innerText = "Check-in ngay";
-            btnCheckinPrev.disabled = false;
-            btnCheckinPrev.style.opacity = "1";
-        }
-        safeText('val-weight-update-time', "Cập nhật: Hôm nay");
-    }
+    // Dynamic check-in state is now handled by updateDashboardCheckin()
 
     // Mini sidebar updates for checked/unchecked preview
     const dashDiaryList = document.getElementById('dash-diary-list');
@@ -682,57 +624,11 @@ function updateUI() {
         dashDiaryList.innerHTML = listHTML;
     }
 
-    // Water Tracker values
-    const waterLiters = state.water.current;
-    const waterTarget = state.water.target;
-    const waterRemain = Math.max(0, waterTarget - waterLiters);
-    
-    safeText('dash-water-volume', waterLiters.toFixed(1));
-    safeText('dash-water-remain', waterRemain.toFixed(1));
-
-    safeHTML('water-current-text', `${waterLiters.toFixed(1)} <span class="unit">lít</span>`);
-    safeText('water-missing-liters', waterRemain.toFixed(1));
-    safeText('water-missing-glasses', Math.ceil(waterRemain / 0.25));
-
-    // Height of water cylinder animation
-    const waterPercent = Math.min(100, Math.round((waterLiters / waterTarget) * 100));
-    const waterLevelEl = document.getElementById('water-level-fill');
-    if (waterLevelEl) {
-        waterLevelEl.style.height = `${waterPercent}%`;
-    }
-    const miniWaterWaveEl = document.querySelector('.mini-water-wave');
-    if (miniWaterWaveEl) {
-        miniWaterWaveEl.style.height = `${waterPercent}%`;
-    }
-
-    const waterAlertEl = document.getElementById('water-warning-alert');
-    if (waterRemain <= 0) {
-        if (waterAlertEl) {
-            waterAlertEl.style.backgroundColor = 'var(--color-green-light)';
-            waterAlertEl.style.borderColor = 'var(--color-green)';
-            const alertIcon = waterAlertEl.querySelector('.alert-icon');
-            if (alertIcon) alertIcon.style.color = 'var(--color-green)';
-            const alertH4 = waterAlertEl.querySelector('.alert-body h4');
-            if (alertH4) alertH4.innerText = "Đã đủ lượng nước cần thiết!";
-            const alertP = waterAlertEl.querySelector('.alert-body p');
-            if (alertP) alertP.innerText = "Tuyệt vời! Bạn đã hoàn thành 100% mục tiêu uống nước hôm nay.";
-        }
-    } else {
-        if (waterAlertEl) {
-            waterAlertEl.style.backgroundColor = 'var(--color-blue-light)';
-            waterAlertEl.style.borderColor = 'rgba(59, 130, 246, 0.2)';
-            const alertIcon = waterAlertEl.querySelector('.alert-icon');
-            if (alertIcon) alertIcon.style.color = 'var(--color-blue)';
-            const alertH4 = waterAlertEl.querySelector('.alert-body h4');
-            if (alertH4) alertH4.innerText = `Bạn còn thiếu ${waterRemain.toFixed(1)} lít nước hôm nay`;
-            const alertP = waterAlertEl.querySelector('.alert-body p');
-            if (alertP) alertP.innerText = `Tương đương khoảng ${Math.ceil(waterRemain / 0.25)} ly nước nữa. Hãy uống đều đặn nhé!`;
-        }
-    }
+    // Dashboard check-in state update
+    updateDashboardCheckin();
 
     // Refresh history grids and lists
     if (typeof renderDisciplineCalendar === 'function') renderDisciplineCalendar();
-    if (typeof renderWaterHistoryList === 'function') renderWaterHistoryList();
     if (typeof renderDiaryMealsList === 'function') renderDiaryMealsList();
 
     // Reinitialize icons rendered via template
@@ -743,30 +639,68 @@ function updateUI() {
     }
 }
 
-// --- Render Water Log History ---
-function renderWaterHistoryList() {
-    const listContainer = document.getElementById('water-history-container');
-    if (!listContainer) return;
-
-    if (state.water.history.length === 0) {
-        listContainer.innerHTML = `<li class="text-muted" style="background:none;justify-content:center;">Chưa có dữ liệu hôm nay</li>`;
-        return;
-    }
-
-    const typeLabels = { water: "Nước lọc", coffee: "Cà phê", tea: "Trà xanh" };
-    let listHTML = '';
+// --- Dashboard Check-in State ---
+function updateDashboardCheckin() {
+    const checkinBody = document.getElementById('dash-checkin-body');
+    const checkinIcon = document.getElementById('dash-checkin-icon');
+    const checkinTitle = document.getElementById('dash-checkin-title');
+    const checkinDesc = document.getElementById('dash-checkin-desc');
+    const checkinBtn = document.getElementById('btn-checkin-now-prev');
+    const streakBadge = document.getElementById('dash-streak-badge');
+    const previewCard = document.getElementById('preview-checkin');
     
-    // Show newest first
-    [...state.water.history].reverse().forEach((log, index) => {
-        listHTML += `
-            <li>
-                <span>${typeLabels[log.type]} (+${log.vol}ml)</span>
-                <span class="time">${log.time}</span>
-            </li>
-        `;
-    });
-
-    listContainer.innerHTML = listHTML;
+    if (!checkinBody || !checkinTitle) return;
+    
+    const todayChecked = state.streak.history30Days[29] === 1;
+    const streakDays = state.streak.current;
+    
+    // Count consecutive missed days from the end (before today)
+    let missedDays = 0;
+    for (let i = 28; i >= 0; i--) {
+        if (state.streak.history30Days[i] === 0) missedDays++;
+        else break;
+    }
+    
+    if (streakBadge) streakBadge.innerText = `🔥 ${streakDays} ngày`;
+    
+    if (todayChecked) {
+        // Success state
+        if (previewCard) previewCard.className = 'preview-card-item flex-col justify-between checkin-state-success';
+        if (checkinIcon) checkinIcon.innerHTML = '<i data-lucide="check-circle"></i>';
+        checkinTitle.innerText = 'Đã check-in hôm nay!';
+        if (checkinDesc) checkinDesc.innerText = `Tuyệt vời! Bạn đang duy trì chuỗi ${streakDays} ngày liên tục.`;
+        if (checkinBtn) {
+            checkinBtn.innerText = 'Đã check-in ✓';
+            checkinBtn.disabled = true;
+            checkinBtn.style.opacity = '0.6';
+        }
+    } else if (missedDays >= 2) {
+        // Danger state - missed multiple days
+        if (previewCard) previewCard.className = 'preview-card-item flex-col justify-between checkin-state-danger';
+        if (checkinIcon) checkinIcon.innerHTML = '<i data-lucide="alert-octagon"></i>';
+        checkinTitle.innerText = `⚠️ Bạn đã quên mục tiêu ${missedDays} ngày!`;
+        if (checkinDesc) checkinDesc.innerText = 'Hãy check-in ngay để không bỏ lỡ mục tiêu giảm cân!';
+        if (checkinBtn) {
+            checkinBtn.innerText = 'Check-in ngay!';
+            checkinBtn.disabled = false;
+            checkinBtn.style.opacity = '1';
+            checkinBtn.style.backgroundColor = 'var(--color-red)';
+        }
+    } else {
+        // Warning state - not checked in today
+        if (previewCard) previewCard.className = 'preview-card-item flex-col justify-between checkin-state-warning';
+        if (checkinIcon) checkinIcon.innerHTML = '<i data-lucide="alert-triangle"></i>';
+        checkinTitle.innerText = 'Bạn chưa check-in hôm nay!';
+        if (checkinDesc) checkinDesc.innerText = 'Hãy check-in để duy trì chuỗi mục tiêu giảm cân.';
+        if (checkinBtn) {
+            checkinBtn.innerText = 'Check-in ngay';
+            checkinBtn.disabled = false;
+            checkinBtn.style.opacity = '1';
+            checkinBtn.style.backgroundColor = '';
+        }
+    }
+    
+    if (window.lucide) lucide.createIcons();
 }
 
 // --- Render 30-Day Streak Grid (GitHub contribution style) ---
@@ -1156,40 +1090,317 @@ function initFoodScanner() {
     });
 }
 
-// --- Interactive Water Tracker Actions ---
-function initWaterTracker() {
-    const handleAddFluid = (type, volumeMl) => {
-        state.water.current = Math.min(5.0, state.water.current + (volumeMl / 1000));
-        
-        const timestamp = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        state.water.history.push({
-            time: timestamp,
-            type: type,
-            vol: volumeMl
+// --- AI Q&A Feature ---
+function initAIQA() {
+    const dropzone = document.getElementById('ai-qa-dropzone');
+    const fileInput = document.getElementById('ai-qa-file-input');
+    const defaultView = document.getElementById('ai-qa-default-view');
+    const previewDiv = document.getElementById('ai-qa-preview');
+    const previewImg = document.getElementById('ai-qa-preview-img');
+    const removeBtn = document.getElementById('ai-qa-remove-img');
+    const questionInput = document.getElementById('ai-qa-question-input');
+    const sendBtn = document.getElementById('ai-qa-send-btn');
+    
+    if (!dropzone || !fileInput) return;
+    
+    let qaBase64Image = '';
+    
+    dropzone.addEventListener('click', (e) => {
+        if (e.target.closest('.ai-qa-remove-img')) return;
+        if (!previewDiv.classList.contains('hidden')) return;
+        fileInput.click();
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) loadQAImage(file);
+    });
+    
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = 'var(--color-primary)'; });
+    dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = ''; });
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = '';
+        const file = e.dataTransfer.files[0];
+        if (file) loadQAImage(file);
+    });
+    
+    function loadQAImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            qaBase64Image = e.target.result;
+            previewImg.src = qaBase64Image;
+            defaultView.classList.add('hidden');
+            previewDiv.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    if (removeBtn) {
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            qaBase64Image = '';
+            previewImg.src = '';
+            previewDiv.classList.add('hidden');
+            defaultView.classList.remove('hidden');
+            fileInput.value = '';
         });
+    }
+    
+    async function sendQuestion() {
+        const question = questionInput.value.trim();
+        if (!question && !qaBase64Image) {
+            alert('Vui lòng nhập câu hỏi hoặc tải ảnh lên!');
+            return;
+        }
+        
+        if (!GEMINI_API_KEY) {
+            if (window.openApiKeyModal) window.openApiKeyModal();
+            return;
+        }
+        
+        // Show loading
+        const resultEmpty = document.getElementById('ai-result-empty');
+        const qaResult = document.getElementById('ai-qa-result');
+        const qaResultBody = document.getElementById('ai-qa-result-body');
+        const resultContent = document.getElementById('ai-result-content');
+        
+        if (resultEmpty) resultEmpty.classList.add('hidden');
+        if (resultContent) resultContent.classList.add('hidden');
+        if (qaResult) qaResult.classList.remove('hidden');
+        if (qaResultBody) qaResultBody.innerText = 'AI đang suy nghĩ...';
+        
+        try {
+            const MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash'];
+            const parts = [];
+            parts.push({ text: question || 'Hãy phân tích ảnh thực phẩm này chi tiết.' });
+            
+            if (qaBase64Image) {
+                let mimeType = 'image/jpeg';
+                let data = qaBase64Image;
+                if (qaBase64Image.includes(',')) {
+                    const p = qaBase64Image.split(',');
+                    mimeType = p[0].match(/:(.*?);/)[1];
+                    data = p[1];
+                }
+                parts.push({ inlineData: { mimeType, data } });
+            }
+            
+            const requestBody = {
+                contents: [{ parts }],
+                generationConfig: { temperature: 0.4 }
+            };
+            
+            let lastError = null;
+            for (const modelName of MODELS) {
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    });
+                    if (!response.ok) { lastError = new Error(`HTTP ${response.status}`); continue; }
+                    const result = await response.json();
+                    if (!result.candidates || result.candidates.length === 0) { lastError = new Error('No result'); continue; }
+                    const textResult = result.candidates[0].content.parts[0].text;
+                    if (qaResultBody) qaResultBody.innerText = textResult;
+                    return;
+                } catch (error) {
+                    lastError = error;
+                    continue;
+                }
+            }
+            throw lastError || new Error('API error');
+        } catch (error) {
+            if (qaResultBody) qaResultBody.innerText = 'Lỗi: ' + error.message;
+        }
+    }
+    
+    if (sendBtn) sendBtn.addEventListener('click', sendQuestion);
+    if (questionInput) questionInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendQuestion();
+    });
+}
+
+// --- Weight Diary ---
+function initWeightDiary() {
+    const form = document.getElementById('form-weight-entry');
+    const dateInput = document.getElementById('weight-entry-date');
+    const kgInput = document.getElementById('weight-entry-kg');
+    
+    if (!form || !dateInput) return;
+    
+    // Set default date to today
+    const today = new Date();
+    dateInput.value = today.toISOString().split('T')[0];
+    
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dateVal = dateInput.value;
+        const kgVal = parseFloat(kgInput.value);
+        if (!dateVal || isNaN(kgVal)) return;
+        
+        // Format date as DD/MM
+        const parts = dateVal.split('-');
+        const dateStr = `${parts[2]}/${parts[1]}`;
+        
+        // Check if date already exists
+        const existing = state.weight.history.find(h => h.date === dateStr);
+        if (existing) {
+            existing.val = kgVal;
+        } else {
+            state.weight.history.push({ date: dateStr, val: kgVal });
+            // Sort by date
+            state.weight.history.sort((a, b) => {
+                const [dA, mA] = a.date.split('/');
+                const [dB, mB] = b.date.split('/');
+                return (parseInt(mA) * 100 + parseInt(dA)) - (parseInt(mB) * 100 + parseInt(dB));
+            });
+        }
+        
+        // Update current weight to latest entry
+        state.weight.current = kgVal;
         
         saveState();
-    };
+        renderWeightDiaryTable();
+        renderWeightDiaryChart();
+        renderWeightChart(); // Update dashboard chart too
+        
+        showNotification('Đã lưu', `Cân nặng ${kgVal} kg ngày ${dateStr} đã được lưu!`, 'success');
+        kgInput.value = '';
+    });
+    
+    // Range selector for diary chart
+    const rangeSelect = document.getElementById('weight-diary-range');
+    if (rangeSelect) {
+        rangeSelect.addEventListener('change', () => renderWeightDiaryChart());
+    }
+    
+    // Initial render
+    renderWeightDiaryTable();
+    renderWeightDiaryChart();
+    updateWeightSummary();
+}
 
-    // Quick add dashboard previews
-    document.getElementById('prev-add-water-1').addEventListener('click', () => handleAddFluid('water', 250));
-    document.getElementById('prev-add-coffee-1').addEventListener('click', () => handleAddFluid('coffee', 150));
-    document.getElementById('prev-add-tea-1').addEventListener('click', () => handleAddFluid('tea', 200));
+let weightDiaryChart = null;
 
-    // Full screen add controls
-    document.getElementById('btn-add-water-250').addEventListener('click', () => handleAddFluid('water', 250));
-    document.getElementById('btn-add-coffee-150').addEventListener('click', () => handleAddFluid('coffee', 150));
-    document.getElementById('btn-add-tea-200').addEventListener('click', () => handleAddFluid('tea', 200));
-
-    // Reset water today
-    document.getElementById('btn-reset-water').addEventListener('click', () => {
-        if (confirm("Bạn có chắc chắn muốn xóa lịch sử uống nước hôm nay không?")) {
-            state.water.current = 0;
-            state.water.history = [];
-            saveState();
+function renderWeightDiaryChart() {
+    const ctx = document.getElementById('weightDiaryChart');
+    if (!ctx) return;
+    
+    const rangeSelect = document.getElementById('weight-diary-range');
+    const range = rangeSelect ? parseInt(rangeSelect.value) : 30;
+    
+    let dataset = state.weight.history;
+    if (range === 7) dataset = dataset.slice(-7);
+    else dataset = dataset.slice(-30);
+    
+    const labels = dataset.map(d => d.date);
+    const dataVals = dataset.map(d => d.val);
+    
+    if (weightDiaryChart) weightDiaryChart.destroy();
+    
+    weightDiaryChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Cân nặng (kg)',
+                data: dataVals,
+                borderColor: '#FF6B00',
+                backgroundColor: 'rgba(255, 107, 0, 0.05)',
+                borderWidth: 3,
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#FF6B00',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1E293B',
+                    titleFont: { family: 'Arial', weight: 'bold' },
+                    bodyFont: { family: 'Arial' },
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: (context) => ` ${context.parsed.y} kg`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    grid: { color: 'rgba(226, 232, 240, 0.6)', drawBorder: false },
+                    ticks: { color: '#64748B', font: { family: 'Arial', size: 11 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748B', font: { family: 'Arial', size: 11 } }
+                }
+            }
         }
     });
 }
+
+function renderWeightDiaryTable() {
+    const tbody = document.getElementById('weight-table-rows');
+    if (!tbody) return;
+    
+    const history = [...state.weight.history].reverse();
+    let html = '';
+    
+    history.forEach((entry, idx) => {
+        const prevEntry = history[idx + 1];
+        let changeHTML = '<span class="weight-change-same">—</span>';
+        if (prevEntry) {
+            const diff = (entry.val - prevEntry.val).toFixed(1);
+            if (diff > 0) changeHTML = `<span class="weight-change-up">+${diff} kg ↑</span>`;
+            else if (diff < 0) changeHTML = `<span class="weight-change-down">${diff} kg ↓</span>`;
+        }
+        
+        html += `<tr>
+            <td>${entry.date}</td>
+            <td><strong>${entry.val} kg</strong></td>
+            <td>${changeHTML}</td>
+            <td><button class="btn-delete-weight" onclick="deleteWeightEntry('${entry.date}')"><i data-lucide="trash-2"></i></button></td>
+        </tr>`;
+    });
+    
+    tbody.innerHTML = html;
+    if (window.lucide) lucide.createIcons();
+}
+
+function updateWeightSummary() {
+    const current = state.weight.current;
+    const target = state.weight.target;
+    const start = state.weight.start;
+    
+    safeText('ws-current', `${current.toFixed(1)} kg`);
+    safeText('ws-target', `${target.toFixed(1)} kg`);
+    safeText('ws-lost', `${Math.max(0, start - current).toFixed(1)} kg`);
+    safeText('ws-remaining', `${Math.max(0, current - target).toFixed(1)} kg`);
+}
+
+window.deleteWeightEntry = function(dateStr) {
+    if (!confirm(`Xóa dữ liệu ngày ${dateStr}?`)) return;
+    state.weight.history = state.weight.history.filter(h => h.date !== dateStr);
+    if (state.weight.history.length > 0) {
+        state.weight.current = state.weight.history[state.weight.history.length - 1].val;
+    }
+    saveState();
+    renderWeightDiaryTable();
+    renderWeightDiaryChart();
+    renderWeightChart();
+    updateWeightSummary();
+};
 
 // --- Add Manual Food Form Submission ---
 function initManualFoodForm() {
@@ -1830,7 +2041,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ['initMenuTabs', initMenuTabs],
         ['initNotificationDialog', initNotificationDialog],
         ['initWeightModal', initWeightModal],
-        ['initWaterTracker', initWaterTracker],
+        ['initAIQA', initAIQA],
+        ['initWeightDiary', initWeightDiary],
         ['initManualFoodForm', initManualFoodForm],
         ['initFoodScanner', initFoodScanner],
         ['initMenuGenerator', initMenuGenerator],

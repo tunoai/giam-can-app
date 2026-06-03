@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FitLife - Trung tâm Giảm cân & Quản lý Ăn uống AI</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font: Arial system font -->
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Lucide Icons -->
@@ -49,13 +46,9 @@
                     <i data-lucide="scan"></i>
                     <span>Nhận diện bữa ăn</span>
                 </a>
-                <a href="#" class="menu-item" data-target="nuoc" id="nav-nuoc">
-                    <i data-lucide="droplet"></i>
-                    <span>Theo dõi nước</span>
-                </a>
-                <a href="#" class="menu-item" data-target="ky-luat" id="nav-ky-luat">
-                    <i data-lucide="shield-alert"></i>
-                    <span>Cảnh báo kỷ luật</span>
+                <a href="#" class="menu-item" data-target="can-nang" id="nav-can-nang">
+                    <i data-lucide="weight"></i>
+                    <span>Nhật ký cân nặng</span>
                 </a>
             </nav>
 
@@ -384,40 +377,18 @@
                             </button>
                         </div>
 
-                        <!-- Water Tracker Box -->
-                        <div class="preview-card-item" id="preview-nuoc">
+                        <!-- Daily Check-in Card -->
+                        <div class="preview-card-item flex-col justify-between" id="preview-checkin">
                             <div class="preview-header">
-                                <h3>Theo dõi nước</h3>
-                                <a href="#" class="preview-link" data-link="nuoc">Xem chi tiết <i data-lucide="chevron-right"></i></a>
+                                <h3>Check-in hôm nay</h3>
+                                <span class="checkin-streak-badge" id="dash-streak-badge">🔥 18 ngày</span>
                             </div>
-                            <div class="preview-water-body">
-                                <div class="water-glass-mini">
-                                    <div class="mini-water-wave" style="height: 60%;"></div>
-                                    <i data-lucide="droplet" class="mini-water-icon"></i>
-                                </div>
-                                <div class="water-stat">
-                                    <h4><span id="dash-water-volume">1.5</span> / 2.5 lít</h4>
-                                    <p>Bạn còn thiếu <span id="dash-water-remain">1.0</span> lít nước</p>
-                                </div>
-                            </div>
-                            <div class="water-quick-buttons">
-                                <button class="btn btn-water-action" id="prev-add-water-1"><i data-lucide="plus"></i>1 Ly nước</button>
-                                <button class="btn btn-coffee-action" id="prev-add-coffee-1"><i data-lucide="plus"></i>1 Cà phê</button>
-                                <button class="btn btn-tea-action" id="prev-add-tea-1"><i data-lucide="plus"></i>1 Trà</button>
-                            </div>
-                        </div>
-
-                        <!-- Alert Box -->
-                        <div class="preview-card-item flex-col justify-between" id="preview-canh-bao">
-                            <div class="preview-header">
-                                <h3>Cảnh báo không check-in</h3>
-                            </div>
-                            <div class="warning-box-body">
-                                <div class="warning-icon-large text-orange">
+                            <div class="checkin-box-body" id="dash-checkin-body">
+                                <div class="checkin-icon-large text-orange" id="dash-checkin-icon">
                                     <i data-lucide="alert-triangle"></i>
                                 </div>
-                                <h4 class="warning-title text-orange" id="dash-warning-status">Bạn chưa check-in hôm nay!</h4>
-                                <p class="warning-desc">Hãy cập nhật dữ liệu để không bị gián đoạn chuỗi mục tiêu giảm cân.</p>
+                                <h4 class="checkin-title" id="dash-checkin-title">Bạn chưa check-in hôm nay!</h4>
+                                <p class="checkin-desc" id="dash-checkin-desc">Hãy check-in để duy trì chuỗi mục tiêu giảm cân.</p>
                             </div>
                             <button class="btn btn-primary w-full" id="btn-checkin-now-prev">Check-in ngay</button>
                         </div>
@@ -711,15 +682,16 @@
                 </section>
 
 
-                <!-- 4. DIARY SCREEN -->
+                <!-- 4. MEAL RECOGNITION SCREEN -->
                 <section class="screen-section" id="screen-nhat-ky">
                     <div class="screen-header">
                         <h2>Nhận diện bữa ăn AI</h2>
-                        <span class="date-badge" id="diary-current-date">Hôm nay, 02/06/2026</span>
+                        <span class="date-badge" id="diary-current-date">Hôm nay, 03/06/2026</span>
                     </div>
 
-                    <div class="scanner-wrapper" style="max-width: 600px; margin: 40px auto;">
-                        <!-- AI Scanning Container -->
+                    <div class="scanner-two-col-layout">
+                        <!-- LEFT COLUMN: AI Scanner + Q&A -->
+                        <div class="scanner-left-col">
                             <div class="grid-card ai-scanner-card">
                                 <h3>AI nhận diện thực phẩm</h3>
                                 <p class="section-subtext">Tải lên ảnh đĩa thức ăn của bạn để AI tự động ước tính khối lượng & calo</p>
@@ -732,7 +704,6 @@
                                         <input type="file" id="scanner-file-input" accept="image/*" class="hidden-file-input">
                                     </div>
 
-                                    <!-- Simulator Scanning Overlay -->
                                     <div class="scanner-processing hidden" id="scanner-processing-view">
                                         <div class="scanner-image-preview-container">
                                             <img src="" id="scanner-preview-img" alt="Scanned Food">
@@ -744,7 +715,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Scanner Success Overlay -->
                                     <div class="scanner-success hidden" id="scanner-success-view">
                                         <div class="scanner-success-header">
                                             <i data-lucide="check-circle-2" class="text-green icon-lg"></i>
@@ -763,9 +733,7 @@
                                             </div>
                                             <div class="detected-items-breakdown">
                                                 <h4 style="font-size: 13px; color: var(--text-light); margin-bottom: 8px; margin-top: 16px;">Chi tiết thành phần:</h4>
-                                                <ul id="detected-food-items-list" class="food-breakdown-list">
-                                                    <!-- Items will be generated here -->
-                                                </ul>
+                                                <ul id="detected-food-items-list" class="food-breakdown-list"></ul>
                                             </div>
                                         </div>
                                         <div class="success-actions">
@@ -778,214 +746,153 @@
                                     <p>Nhấp vào ô quét ảnh hoặc kéo thả ảnh <strong id="demo-trigger-scan" class="cursor-pointer text-underline">healthy_salad.png</strong> đã tạo sẵn để chạy thử mô phỏng AI!</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
 
-                <!-- 5. WATER SCREEN -->
-                <section class="screen-section" id="screen-nuoc">
-                    <div class="screen-header">
-                        <h2>Theo dõi nước</h2>
-                        <span class="badge badge-blue"><i data-lucide="droplet"></i> Hydration Tracking</span>
-                    </div>
-
-                    <div class="water-layout">
-                        <!-- Left Column: Visual Dynamic Glass -->
-                        <div class="grid-card water-visual-card">
-                            <h3>Lượng nước đã nạp hôm nay</h3>
-                            
-                            <!-- The Interactive Glass Graphic -->
-                            <div class="water-glass-container">
-                                <div class="water-glass">
-                                    <div class="water-level" id="water-level-fill" style="height: 60%;">
-                                        <!-- Ripple Effect SVG / CSS -->
-                                        <div class="water-wave wave-1"></div>
-                                        <div class="water-wave wave-2"></div>
-                                    </div>
-                                    <div class="glass-indicators">
-                                        <span>2.5L</span>
-                                        <span>2.0L</span>
-                                        <span>1.5L</span>
-                                        <span>1.0L</span>
-                                        <span>0.5L</span>
+                            <!-- AI Q&A Section -->
+                            <div class="grid-card ai-qa-card">
+                                <div class="ai-qa-header">
+                                    <i data-lucide="message-circle-question" class="ai-qa-icon"></i>
+                                    <div>
+                                        <h3>Hỏi AI về thực phẩm</h3>
+                                        <p class="section-subtext">Tải ảnh và đặt câu hỏi để AI phân tích chi tiết</p>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="water-progress-text">
-                                <h2 id="water-current-text">1.5 <span class="unit">lít</span></h2>
-                                <p>Mục tiêu: <strong>2.5 lít</strong> (10 ly)</p>
+                                <div class="ai-qa-upload-zone" id="ai-qa-dropzone">
+                                    <div class="ai-qa-upload-inner" id="ai-qa-default-view">
+                                        <i data-lucide="image-plus" class="ai-qa-upload-icon"></i>
+                                        <p>Kéo & thả ảnh tại đây hoặc click để chọn</p>
+                                        <input type="file" id="ai-qa-file-input" accept="image/*" class="hidden-file-input">
+                                    </div>
+                                    <div class="ai-qa-preview hidden" id="ai-qa-preview">
+                                        <img src="" id="ai-qa-preview-img" alt="Ảnh câu hỏi">
+                                        <button class="ai-qa-remove-img" id="ai-qa-remove-img" title="Xóa ảnh">
+                                            <i data-lucide="x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="ai-qa-input-group">
+                                    <input type="text" class="ai-qa-input" id="ai-qa-question-input" placeholder="VD: Ly nước trái cây này 100g thì bao nhiêu calo?" />
+                                    <button class="btn btn-primary ai-qa-send-btn" id="ai-qa-send-btn">
+                                        <i data-lucide="send"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Right Column: Interactive Buttons & Logs -->
-                        <div class="water-controls-card grid-card">
-                            <h3>Bảng nạp nước nhanh</h3>
-                            <p class="section-subtext">Click các tùy chọn để cộng thêm lượng nước bạn đã uống</p>
-
-                            <div class="water-quick-grid">
-                                <button class="water-btn-large" id="btn-add-water-250">
-                                    <div class="w-icon-circle bg-blue-light text-blue">
-                                        <i data-lucide="glass-water"></i>
-                                    </div>
-                                    <div class="w-text">
-                                        <h4>1 Ly nước</h4>
-                                        <span>+250ml</span>
-                                    </div>
-                                </button>
-
-                                <button class="water-btn-large" id="btn-add-coffee-150">
-                                    <div class="w-icon-circle bg-coffee-light text-coffee">
-                                        <i data-lucide="coffee"></i>
-                                    </div>
-                                    <div class="w-text">
-                                        <h4>Cà phê</h4>
-                                        <span>+150ml</span>
-                                    </div>
-                                </button>
-
-                                <button class="water-btn-large" id="btn-add-tea-200">
-                                    <div class="w-icon-circle bg-tea-light text-tea">
-                                        <i data-lucide="cup-soda"></i>
-                                    </div>
-                                    <div class="w-text">
-                                        <h4>Trà xanh</h4>
-                                        <span>+200ml</span>
-                                    </div>
-                                </button>
-                            </div>
-
-                            <!-- Water Warning Banner -->
-                            <div class="water-warning-banner" id="water-warning-alert">
-                                <i data-lucide="alert-circle" class="alert-icon"></i>
-                                <div class="alert-body">
-                                    <h4>Bạn còn thiếu <span id="water-missing-liters">1.0</span> lít nước hôm nay</h4>
-                                    <p>Tương đương khoảng <span id="water-missing-glasses">4</span> ly nước nữa. Hãy uống đều đặn nhé!</p>
+                        <!-- RIGHT COLUMN: AI Analysis Results -->
+                        <div class="scanner-right-col">
+                            <div class="grid-card ai-result-detail-card">
+                                <div class="ai-result-header">
+                                    <i data-lucide="file-text" class="ai-result-icon"></i>
+                                    <h3>Kết quả phân tích AI</h3>
                                 </div>
-                            </div>
-
-                            <!-- Water Log History -->
-                            <div class="water-history">
-                                <h4>Nhật ký nạp nước hôm nay</h4>
-                                <ul class="water-history-list" id="water-history-container">
-                                    <!-- Populated via Javascript -->
-                                </ul>
-                                <button class="btn btn-outline-sm btn-reset-water" id="btn-reset-water">
-                                    <i data-lucide="rotate-ccw"></i> Reset hôm nay
-                                </button>
+                                <div class="ai-result-empty" id="ai-result-empty">
+                                    <div class="ai-result-empty-icon">
+                                        <i data-lucide="scan-search"></i>
+                                    </div>
+                                    <h4>Chưa có kết quả</h4>
+                                    <p>Hãy tải lên ảnh món ăn hoặc đặt câu hỏi cho AI để xem kết quả phân tích chi tiết tại đây.</p>
+                                </div>
+                                <div class="ai-result-content hidden" id="ai-result-content">
+                                    <div class="ai-result-section" id="ai-scanner-result-section">
+                                        <div class="ai-result-food-name" id="ai-result-food-name"></div>
+                                        <div class="ai-result-stats-grid" id="ai-result-stats-grid"></div>
+                                        <div class="ai-result-macros-bar" id="ai-result-macros-bar"></div>
+                                        <div class="ai-result-items-list">
+                                            <h4>Chi tiết thành phần</h4>
+                                            <ul id="ai-result-items-ul"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ai-qa-result hidden" id="ai-qa-result">
+                                    <div class="ai-qa-result-header">
+                                        <i data-lucide="bot" class="ai-qa-bot-icon"></i>
+                                        <h4>Câu trả lời từ AI</h4>
+                                    </div>
+                                    <div class="ai-qa-result-body" id="ai-qa-result-body"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- 6. DISCIPLINE WARNING SCREEN -->
-                <section class="screen-section" id="screen-ky-luat">
+                <!-- WEIGHT DIARY SCREEN -->
+                <section class="screen-section" id="screen-can-nang">
                     <div class="screen-header">
-                        <h2>Trạng thái mục tiêu</h2>
-                        <span class="badge badge-orange"><i data-lucide="shield-alert"></i> Hệ thống Kỷ luật</span>
+                        <h2>Nhật ký cân nặng</h2>
+                        <span class="badge badge-primary"><i data-lucide="trending-down"></i> Theo dõi tiến trình</span>
                     </div>
 
-                    <!-- Target Status Color Banner -->
-                    <div class="discipline-status-banner status-yellow" id="discipline-active-banner">
-                        <div class="banner-icon" id="discipline-banner-icon">
-                            <i data-lucide="alert-triangle"></i>
-                        </div>
-                        <div class="banner-body">
-                            <h2 id="discipline-banner-title">Bạn chưa cập nhật dữ liệu hôm nay</h2>
-                            <p id="discipline-banner-desc">Hãy cập nhật nhật ký ăn uống hoặc nhấn nút "Check-in ngay" bên dưới để hoàn tất mục tiêu hôm nay và duy trì streak.</p>
-                        </div>
-                    </div>
-
-                    <div class="discipline-layout">
-                        <!-- Streak and Checker Details Left -->
-                        <div class="grid-card discipline-streak-card">
-                            <h3>Phân tích kỷ luật ăn uống</h3>
+                    <div class="weight-diary-layout">
+                        <!-- Left: Input Form -->
+                        <div class="grid-card weight-input-card">
+                            <h3>Nhập dữ liệu cân nặng</h3>
+                            <p class="section-subtext">Cập nhật cân nặng hàng ngày để theo dõi tiến trình giảm cân</p>
                             
-                            <div class="discipline-streaks-row">
-                                <div class="discipline-stat-box">
-                                    <span class="s-label">Chuỗi check-in hiện tại</span>
-                                    <div class="s-val text-orange">
-                                        <span id="discipline-streak-current">18</span> <span class="unit">ngày</span>
-                                    </div>
-                                    <span class="s-sub">Liên tục 🔥</span>
+                            <form id="form-weight-entry" class="weight-entry-form">
+                                <div class="form-group">
+                                    <label for="weight-entry-date">Ngày</label>
+                                    <input type="date" class="form-control" id="weight-entry-date" required>
                                 </div>
-                                <div class="discipline-stat-box">
-                                    <span class="s-label">Chuỗi kỷ lục cao nhất</span>
-                                    <div class="s-val text-green">
-                                        <span>45</span> <span class="unit">ngày</span>
-                                    </div>
-                                    <span class="s-sub">Đạt được vào 15/04/2026</span>
+                                <div class="form-group">
+                                    <label for="weight-entry-kg">Cân nặng (kg)</label>
+                                    <input type="number" step="0.1" min="30" max="200" class="form-control" id="weight-entry-kg" placeholder="VD: 82.3" required>
                                 </div>
-                                <div class="discipline-stat-box">
-                                    <span class="s-label">Tỷ lệ tuân thủ tháng</span>
-                                    <div class="s-val text-blue">
-                                        <span id="discipline-compliance-month">94</span><span class="unit">%</span>
-                                    </div>
-                                    <span class="s-sub">Tổng 28/30 ngày đạt mục tiêu</span>
-                                </div>
-                            </div>
-
-                            <!-- Interactive Check-in Button area -->
-                            <div class="checkin-action-box">
-                                <h4>Nhật ký kỷ luật hôm nay</h4>
-                                <p class="text-muted">Nhấp vào nút bên dưới để xác nhận hôm nay bạn đã duy trì đúng kỷ luật ăn uống theo kế hoạch.</p>
-                                <button class="btn btn-primary btn-large btn-checkin-full" id="btn-discipline-checkin">
-                                    <i data-lucide="check-circle"></i> Check-in ngay hôm nay
+                                <button type="submit" class="btn btn-primary w-full" id="btn-save-weight">
+                                    <i data-lucide="save"></i> Lưu dữ liệu
                                 </button>
-                                <span class="checkin-time-info" id="discipline-checkin-timestamp">Cần check-in trước 23:59 hôm nay</span>
+                            </form>
+
+                            <!-- Weight History Table -->
+                            <div class="weight-history-table">
+                                <h4>Lịch sử cân nặng gần đây</h4>
+                                <div class="weight-table-wrapper">
+                                    <table id="weight-history-table-body">
+                                        <thead>
+                                            <tr>
+                                                <th>Ngày</th>
+                                                <th>Cân nặng</th>
+                                                <th>Thay đổi</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="weight-table-rows">
+                                            <!-- Populated by JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 30-day Contribution Full View Right -->
-                        <div class="grid-card discipline-calendar-card">
+                        <!-- Right: Chart Preview -->
+                        <div class="grid-card weight-chart-card">
                             <div class="card-header">
-                                <h3>Bản đồ thói quen 30 ngày</h3>
-                                <div class="calendar-legends">
-                                    <span class="legend"><span class="dot dot-green"></span> Đã check-in</span>
-                                    <span class="legend"><span class="dot dot-orange"></span> Chưa check-in</span>
-                                    <span class="legend"><span class="dot dot-grey"></span> Bỏ lỡ</span>
+                                <h3>Biểu đồ cân nặng</h3>
+                                <select class="select-input" id="weight-diary-range">
+                                    <option value="30">30 ngày</option>
+                                    <option value="7">7 ngày</option>
+                                </select>
+                            </div>
+                            <div class="chart-container" style="height: 350px;">
+                                <canvas id="weightDiaryChart"></canvas>
+                            </div>
+                            <div class="weight-summary-stats">
+                                <div class="weight-summary-item">
+                                    <span class="ws-label">Cân nặng hiện tại</span>
+                                    <span class="ws-value" id="ws-current">82.3 kg</span>
+                                </div>
+                                <div class="weight-summary-item">
+                                    <span class="ws-label">Mục tiêu</span>
+                                    <span class="ws-value text-green" id="ws-target">75.0 kg</span>
+                                </div>
+                                <div class="weight-summary-item">
+                                    <span class="ws-label">Đã giảm</span>
+                                    <span class="ws-value text-orange" id="ws-lost">2.7 kg</span>
+                                </div>
+                                <div class="weight-summary-item">
+                                    <span class="ws-label">Còn lại</span>
+                                    <span class="ws-value" id="ws-remaining">7.3 kg</span>
                                 </div>
                             </div>
-                            <p class="section-subtext">Theo dõi tính liên tục như bảng đóng góp mã nguồn GitHub hoặc chuỗi bài học Duolingo</p>
-                            
-                            <div class="habit-heatmap-container" id="habit-heatmap-grid">
-                                <!-- Generated dynamically via JS to look like GitHub contribution grid -->
-                            </div>
-
-                            <div class="discipline-risk-card">
-                                <h4>Đánh giá rủi ro bỏ cuộc</h4>
-                                <div class="risk-meter-container">
-                                    <div class="risk-bar-bg">
-                                        <div class="risk-bar-fg" id="discipline-risk-bar" style="width: 15%; background: var(--color-green);"></div>
-                                    </div>
-                                    <div class="risk-labels">
-                                        <span class="text-green">Rất thấp</span>
-                                        <span>Trung bình</span>
-                                        <span class="text-red">Nguy cơ cao</span>
-                                    </div>
-                                </div>
-                                <p class="risk-evaluation-text" id="discipline-risk-eval">Hệ thống phân tích: Bạn đang duy trì phong độ rất tốt (18 ngày streak). Rủi ro bỏ cuộc là <strong>15% (Rất thấp)</strong>. Hãy duy trì thói quen!</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Debug and Testing Section (Simulating streak states) -->
-                    <div class="grid-card test-discipline-states-card">
-                        <h3>[Bảng giả lập chạy thử] Thử nghiệm các kịch bản kỷ luật</h3>
-                        <p class="section-subtext">Click các trạng thái giả lập bên dưới để xem sự thay đổi giao diện theo các mức độ cảnh báo kỷ luật</p>
-                        <div class="test-states-buttons">
-                            <button class="btn btn-success-sm" id="btn-test-state-green">
-                                <span class="dot dot-green"></span> Giả lập Xanh (Đã check-in)
-                            </button>
-                            <button class="btn btn-warning-sm" id="btn-test-state-yellow">
-                                <span class="dot dot-orange"></span> Giả lập Vàng (Chưa cập nhật hôm nay)
-                            </button>
-                            <button class="btn btn-orange-sm" id="btn-test-state-orange">
-                                <span class="dot dot-orange"></span> Giả lập Cam (Đã bỏ lỡ 2 ngày)
-                            </button>
-                            <button class="btn btn-danger-sm" id="btn-test-state-red">
-                                <span class="dot dot-red"></span> Giả lập Đỏ (Nguy cơ bỏ cuộc cao)
-                            </button>
                         </div>
                     </div>
                 </section>
