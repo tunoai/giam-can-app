@@ -1620,8 +1620,21 @@ function applyAIMenu(aiMenu) {
                 generateFoodImage(mealData.imageKeyword).then(dataUrl => {
                     imgEl.innerHTML = '';
                     imgEl.style.display = '';
-                    imgEl.style.backgroundImage = `url('${dataUrl}')`;
                     imgEl.style.background = '';
+                    imgEl.style.backgroundImage = `url('${dataUrl}')`;
+                    imgEl.style.backgroundSize = 'cover';
+                    imgEl.style.backgroundPosition = 'center';
+                }).catch(() => {
+                    // Fallback: use a keyword-based local image
+                    imgEl.innerHTML = '';
+                    imgEl.style.display = '';
+                    imgEl.style.background = '';
+                    const kw = (mealData.imageKeyword || '').toLowerCase();
+                    let fallback = 'healthy_lunch.png';
+                    if (meal === 'breakfast' || kw.includes('oat') || kw.includes('egg') || kw.includes('bread')) fallback = 'healthy_breakfast.png';
+                    else if (meal === 'dinner' || kw.includes('fish') || kw.includes('salmon')) fallback = 'healthy_dinner.png';
+                    else if (meal === 'snack' || kw.includes('fruit') || kw.includes('nut') || kw.includes('yogurt')) fallback = 'healthy_snack.png';
+                    imgEl.style.backgroundImage = `url('${fallback}')`;
                     imgEl.style.backgroundSize = 'cover';
                     imgEl.style.backgroundPosition = 'center';
                 });
@@ -1632,7 +1645,7 @@ function applyAIMenu(aiMenu) {
 
 // Generate food image using Gemini API (same API key)
 async function generateFoodImage(keyword) {
-    const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash-preview-image-generation'];
+    const MODELS = ['gemini-2.0-flash-exp', 'gemini-2.0-flash-preview-image-generation'];
     
     const prompt = `Generate a beautiful, professional food photography image of: ${keyword}. 
 The image should look like a real photograph taken from above or at a 45-degree angle, with natural lighting, on a clean plate or wooden table. Make it look appetizing and high quality.`;
