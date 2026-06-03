@@ -2618,8 +2618,25 @@ async function analyzeImageWithGemini(base64Image) {
     let mimeType = "image/jpeg";
     let data = base64Image;
 
-    if (base64Image.includes(',')) {
-        const parts = base64Image.split(',');
+    // Convert URL to base64 if it's an http link (Firebase Storage)
+    if (base64Image.startsWith('http')) {
+        try {
+            const response = await fetch(base64Image);
+            const blob = await response.blob();
+            const dataUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+            data = dataUrl;
+        } catch (e) {
+            throw new Error("Không thể tải ảnh từ Cloud để phân tích. Lỗi mạng hoặc CORS.");
+        }
+    }
+
+    if (data.includes(',')) {
+        const parts = data.split(',');
         mimeType = parts[0].match(/:(.*?);/)[1];
         data = parts[1];
     }
