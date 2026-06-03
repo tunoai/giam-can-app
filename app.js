@@ -203,6 +203,20 @@ function loadState() {
             if (data) {
                 isSyncingFromFirebase = true;
                 state = data;
+                
+                // Fix Firebase array-to-object conversion
+                if (state.library && !Array.isArray(state.library)) {
+                    state.library = Object.values(state.library).filter(Boolean);
+                } else if (!state.library) {
+                    state.library = [];
+                }
+                
+                if (state.history && !Array.isArray(state.history)) {
+                    state.history = Object.values(state.history).filter(Boolean);
+                } else if (!state.history) {
+                    state.history = [];
+                }
+                
                 delete state.library_images; // cleanup if exists
                 if (state.user && state.user.name === "Nguyễn Mai") {
                     state.user.name = "Tùng Chu";
