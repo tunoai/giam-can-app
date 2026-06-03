@@ -2249,12 +2249,22 @@ function initLibrary() {
                                 kcal: 0
                             };
                             state.library.push(newItem);
-                            // Upload ảnh lên Firebase để đồng bộ giữa các thiết bị
-                            saveImageToFirebase(newItem.id, compressedBase64);
                             saveState();
                             renderLibraryGrid();
                             uploadInput.value = '';
-                            showNotification("Thành công", "Ảnh đã được tải lên thư viện!", "success");
+                            
+                            // Auto upload to storage in background
+                            uploadImageToStorage(newItem.id, compressedBase64).then(url => {
+                                if (url) {
+                                    const item = state.library.find(i => i.id === newItem.id);
+                                    if (item) {
+                                        item.img = url;
+                                        saveState();
+                                    }
+                                }
+                            });
+                            
+                            showNotification("Thành công", "Ảnh đã tải lên! Đang đồng bộ tự động lên Cloud Storage...", "success");
                         } catch (err) {
                             console.error("Lỗi upload ảnh:", err);
                             state.library.pop();
