@@ -3024,7 +3024,7 @@ button {
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
     }
 
-    .sidebar-brand, .sidebar-profile {
+    .sidebar-brand, .sidebar-profile, .sidebar-apikey {
         display: none;
     }
 
@@ -3040,6 +3040,10 @@ button {
         flex-direction: column;
         gap: 4px;
         font-size: 0.65rem;
+    }
+
+    .menu-item span {
+        display: none;
     }
 
     .menu-item i {
