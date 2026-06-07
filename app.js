@@ -757,6 +757,14 @@ function renderDisciplineCalendar() {
             `;
         });
         gridDashboard.innerHTML = dashboardHTML;
+        
+        // Auto-scroll to the far right so today's date is always visible
+        setTimeout(() => {
+            const wrapper = gridDashboard.closest('.streak-grid-wrapper');
+            if (wrapper) {
+                wrapper.scrollLeft = wrapper.scrollWidth;
+            }
+        }, 50);
     }
 
     if (gridDiscipline) {
