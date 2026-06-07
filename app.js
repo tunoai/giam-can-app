@@ -957,6 +957,9 @@ function executeCheckIn() {
     }
 
     saveState();
+    
+    // Update UI components before redirecting
+    updateUI();
 
     // Show a congratulatory popup or alert
     alert(`Chúc mừng! Bạn đã check-in kỷ luật thành công.\nChuỗi streak tăng lên ${state.streak.current} ngày liên tục! 🔥`);
@@ -1086,7 +1089,10 @@ function initFoodScanner() {
             window.lastScannedFood = {
                 name: aiData.name,
                 weight: aiData.weight,
-                kcal: aiData.kcal
+                kcal: aiData.kcal,
+                img: base64Image,
+                items: aiData.items,
+                macros: aiData.macros
             };
         } catch (error) {
             console.error("Lỗi scan:", error);
@@ -1094,6 +1100,46 @@ function initFoodScanner() {
             processingView.classList.add('hidden');
             defaultView.classList.remove('hidden');
         }
+    }
+
+    // Save to history
+    const btnSaveScan = document.getElementById('btn-save-scan-history');
+    if (btnSaveScan) {
+        btnSaveScan.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.lastScannedFood && window.lastScannedFood.img) {
+                const newItem = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                    img: window.lastScannedFood.img,
+                    analyzed: true,
+                    name: window.lastScannedFood.name,
+                    weight: window.lastScannedFood.weight + "g",
+                    kcal: window.lastScannedFood.kcal,
+                    items: window.lastScannedFood.items || [],
+                    macros: window.lastScannedFood.macros
+                };
+                if (!state.library) state.library = [];
+                state.library.push(newItem);
+                saveState();
+                if (typeof renderLibraryGrid === 'function') renderLibraryGrid();
+                
+                showNotification("Thành công", "Đã lưu kết quả quét vào Thư viện bữa ăn!", "success");
+                
+                if (typeof uploadImageToStorage === 'function') {
+                    uploadImageToStorage(newItem.id, newItem.img).then(url => {
+                        if (url) {
+                            const item = state.library.find(i => i.id === newItem.id);
+                            if (item) {
+                                item.img = url;
+                                saveState();
+                            }
+                        }
+                    });
+                }
+            } else {
+                showNotification("Lỗi", "Không tìm thấy dữ liệu để lưu.", "error");
+            }
+        });
     }
 
     // Reset scanner to scan again
@@ -1115,8 +1161,25 @@ function initAIQA() {
     const removeBtn = document.getElementById('ai-qa-remove-img');
     const questionInput = document.getElementById('ai-qa-question-input');
     const sendBtn = document.getElementById('ai-qa-send-btn');
+    const clearBtn = document.getElementById('btn-clear-qa-input');
     
     if (!dropzone || !fileInput) return;
+
+    if (questionInput && clearBtn) {
+        questionInput.addEventListener('input', () => {
+            if (questionInput.value.length > 0) {
+                clearBtn.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            questionInput.value = '';
+            clearBtn.style.display = 'none';
+            questionInput.focus();
+        });
+    }
     
     let qaBase64Image = '';
     
@@ -1188,7 +1251,9 @@ function initAIQA() {
         try {
             const MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash'];
             const parts = [];
-            parts.push({ text: question || 'Hãy phân tích ảnh thực phẩm này chi tiết.' });
+            const promptText = question || 'Hãy phân tích ảnh thực phẩm này chi tiết.';
+            const promptSuffix = '\n\n(Lưu ý: Luôn trả lời bằng tiếng Việt một cách tự nhiên và chính xác.)';
+            parts.push({ text: promptText + promptSuffix });
             
             if (qaBase64Image) {
                 let mimeType = 'image/jpeg';

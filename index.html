@@ -661,6 +661,9 @@
                                             </div>
                                         </div>
                                         <div class="success-actions">
+                                            <button class="btn btn-primary-sm" id="btn-save-scan-history" style="width: 100%; margin-bottom: 8px;">
+                                                <i data-lucide="save"></i> Lưu vào Thư viện bữa ăn
+                                            </button>
                                             <button class="btn btn-outline-sm" id="btn-scan-again" style="width: 100%;">Quét ảnh khác</button>
                                         </div>
                                     </div>
@@ -690,8 +693,11 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="ai-qa-input-group">
-                                    <input type="text" class="ai-qa-input" id="ai-qa-question-input" placeholder="VD: Ly nước trái cây này 100g thì bao nhiêu calo?" />
+                                <div class="ai-qa-input-group" style="position: relative;">
+                                    <input type="text" class="ai-qa-input" id="ai-qa-question-input" placeholder="VD: Ly nước trái cây này 100g thì bao nhiêu calo?" style="padding-right: 32px;" />
+                                    <button id="btn-clear-qa-input" title="Xóa" style="position: absolute; right: 58px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94a3b8; display: none;">
+                                        <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                                    </button>
                                     <button class="btn btn-primary ai-qa-send-btn" id="ai-qa-send-btn">
                                         <i data-lucide="send"></i>
                                     </button>
