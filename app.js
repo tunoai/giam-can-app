@@ -2218,78 +2218,95 @@ function initLibrary() {
     const uploadInput = document.getElementById('library-upload-input');
     if (uploadInput) {
         uploadInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        try {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-                            const MAX_SIZE = 600; // Giảm xuống 600px để ảnh nhẹ hơn nữa
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                let processedCount = 0;
+                let errorCount = 0;
 
-                            if (width > height) {
-                                if (width > MAX_SIZE) {
-                                    height *= MAX_SIZE / width;
-                                    width = MAX_SIZE;
-                                }
-                            } else {
-                                if (height > MAX_SIZE) {
-                                    width *= MAX_SIZE / height;
-                                    height = MAX_SIZE;
-                                }
-                            }
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const MAX_SIZE = 600;
 
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-
-                            // Nén ảnh sang JPEG chất lượng 60%
-                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-
-                            const newItem = {
-                                id: Date.now().toString(),
-                                img: compressedBase64,
-                                analyzed: false,
-                                name: "",
-                                weight: "",
-                                kcal: 0
-                            };
-                            state.library.push(newItem);
-                            saveState();
-                            renderLibraryGrid();
-                            uploadInput.value = '';
-                            
-                            // Auto upload to storage in background
-                            uploadImageToStorage(newItem.id, compressedBase64).then(url => {
-                                if (url) {
-                                    const item = state.library.find(i => i.id === newItem.id);
-                                    if (item) {
-                                        item.img = url;
-                                        saveState();
+                                if (width > height) {
+                                    if (width > MAX_SIZE) {
+                                        height *= MAX_SIZE / width;
+                                        width = MAX_SIZE;
+                                    }
+                                } else {
+                                    if (height > MAX_SIZE) {
+                                        width *= MAX_SIZE / height;
+                                        height = MAX_SIZE;
                                     }
                                 }
-                            });
-                            
-                            showNotification("Thành công", "Ảnh đã tải lên! Đang đồng bộ tự động lên Cloud Storage...", "success");
-                        } catch (err) {
-                            console.error("Lỗi upload ảnh:", err);
-                            state.library.pop();
-                            showNotification("Lỗi", "Lỗi khi xử lý ảnh: " + (err.message || err), "error");
+
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+
+                                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+                                const newItem = {
+                                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                                    img: compressedBase64,
+                                    analyzed: false,
+                                    name: "",
+                                    weight: "",
+                                    kcal: 0
+                                };
+                                state.library.push(newItem);
+                                saveState();
+                                renderLibraryGrid();
+                                
+                                // Auto upload to storage in background
+                                uploadImageToStorage(newItem.id, compressedBase64).then(url => {
+                                    if (url) {
+                                        const item = state.library.find(i => i.id === newItem.id);
+                                        if (item) {
+                                            item.img = url;
+                                            saveState();
+                                        }
+                                    }
+                                });
+
+                                processedCount++;
+                                checkCompletion();
+                            } catch (err) {
+                                console.error("Lỗi upload ảnh:", err);
+                                errorCount++;
+                                checkCompletion();
+                            }
+                        };
+                        img.onerror = () => {
+                            errorCount++;
+                            checkCompletion();
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.onerror = () => {
+                        errorCount++;
+                        checkCompletion();
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                function checkCompletion() {
+                    if (processedCount + errorCount === files.length) {
+                        uploadInput.value = '';
+                        if (errorCount === 0) {
+                            showNotification("Thành công", `Đã tải lên ${processedCount} ảnh! Đang đồng bộ tự động lên Cloud Storage...`, "success");
+                        } else {
+                            showNotification("Xong", `Đã tải lên ${processedCount} ảnh, lỗi ${errorCount} ảnh.`, "warning");
                         }
-                    };
-                    img.onerror = () => {
-                        showNotification("Lỗi", "Không thể đọc file ảnh này. Hãy thử ảnh khác.", "error");
-                    };
-                    img.src = event.target.result;
-                };
-                reader.onerror = () => {
-                    showNotification("Lỗi", "Không thể đọc file. Hãy thử lại.", "error");
-                };
-                reader.readAsDataURL(file);
+                    }
+                }
             }
         });
     }
