@@ -9,6 +9,7 @@ const DEFAULT_STATE = {
         avatar: "tung_chu_avatar.png"
     },
     library: [],
+    scanHistory: [],
     weight: {
         current: 82.3,
         target: 75.0,
@@ -648,10 +649,40 @@ function updateUI() {
 
     // Reinitialize icons rendered via template
     if (window.lucide) lucide.createIcons();
+    renderScanHistory();
     
     } catch (uiErr) {
         console.warn("updateUI gặp lỗi (không ảnh hưởng dữ liệu):", uiErr);
     }
+}
+
+function renderScanHistory() {
+    const listEl = document.getElementById('scan-history-list');
+    if (!listEl) return;
+    
+    if (!state.scanHistory || state.scanHistory.length === 0) {
+        listEl.innerHTML = `
+            <div class="empty-state" id="scan-history-empty" style="text-align: center; padding: 20px; color: var(--text-light); font-size: 14px;">
+                Chưa có lịch sử quét
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    [...state.scanHistory].reverse().forEach(item => {
+        html += `
+            <div class="scan-history-item" style="display: flex; gap: 12px; align-items: center; background: white; padding: 12px; border-radius: 12px; border: 1px solid var(--color-border); box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <img src="${item.img}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" />
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 4px 0; font-size: 14px; color: var(--text-main);">${item.name}</h4>
+                    <span style="font-size: 12px; color: var(--text-light);">${item.weight} • <strong style="color: var(--color-primary);">${item.kcal} kcal</strong></span>
+                </div>
+            </div>
+        `;
+    });
+    
+    listEl.innerHTML = html;
 }
 
 // --- Dashboard Check-in State ---
@@ -1102,6 +1133,19 @@ function initFoodScanner() {
                 items: aiData.items,
                 macros: aiData.macros
             };
+            
+            if (!state.scanHistory) state.scanHistory = [];
+            state.scanHistory.push({
+                id: Date.now().toString(),
+                name: aiData.name,
+                weight: aiData.weight + "g",
+                kcal: aiData.kcal,
+                img: base64Image,
+                timestamp: new Date().toISOString()
+            });
+            saveState();
+            renderScanHistory();
+
         } catch (error) {
             console.error("Lỗi scan:", error);
             showNotification("Lỗi Phân Tích", "Đã có lỗi khi gọi Gemini API. Vui lòng thử lại.", "error");
