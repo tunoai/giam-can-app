@@ -46,7 +46,7 @@ const DEFAULT_STATE = {
     checkins: {},
     run: { startDate: null, days: [1, 3, 5], log: {}, extra: [] },
     gym: { log: {} },
-    goal: { photo: '', note: '' },
+    goal: { photos: [], note: '' },
     library: [],
     _meta: null
 };
@@ -59,6 +59,10 @@ function normalize(raw) {
         s[key] = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE[key])), s[key] || {});
     }
     s.checkins = s.checkins || {};
+    // Ảnh mục tiêu: bản cũ chỉ có 1 ảnh (goal.photo) → chuyển sang danh sách
+    s.goal.photos = toArr(s.goal.photos).filter(Boolean);
+    if (s.goal.photo) { if (!s.goal.photos.includes(s.goal.photo)) s.goal.photos.unshift(s.goal.photo); }
+    delete s.goal.photo;
     const libRaw = s.library;
     s.library = Array.isArray(libRaw)
         ? libRaw.map((x, i) => (x ? { ...x, _k: String(i) } : null)).filter(Boolean)
@@ -337,7 +341,17 @@ function pickImage() {
     return new Promise((resolve) => {
         const input = $('#file-input');
         input.value = '';
+        input.multiple = false;
         input.onchange = () => resolve(input.files[0] || null);
+        input.click();
+    });
+}
+function pickImages() {
+    return new Promise((resolve) => {
+        const input = $('#file-input');
+        input.value = '';
+        input.multiple = true;
+        input.onchange = () => resolve([...input.files]);
         input.click();
     });
 }
@@ -430,6 +444,33 @@ function render() {
     el.innerHTML = views[ui.view]();
     icons();
     if (ui.view === 'weight') drawWeightChart();
+    if (ui.view === 'today') bindGoalSlides();
+}
+
+// Lướt ngang giữa các ảnh mục tiêu, tự chuyển ảnh sau 5 giây
+let goalTimer = null;
+function bindGoalSlides() {
+    clearInterval(goalTimer);
+    const box = $('#goal-slides');
+    if (!box) return;
+    const n = box.children.length;
+    ui.goalIdx = Math.min(ui.goalIdx || 0, n - 1);
+    box.scrollLeft = ui.goalIdx * box.clientWidth;
+    const dots = $$('.goal-dots i', box.parentElement);
+    const sync = () => {
+        ui.goalIdx = Math.round(box.scrollLeft / box.clientWidth);
+        dots.forEach((d, k) => d.classList.toggle('on', k === ui.goalIdx));
+    };
+    box.onscroll = sync;
+    if (n < 2) return;
+    goalTimer = setInterval(() => {
+        if (!document.body.contains(box)) return clearInterval(goalTimer);
+        sync();
+        const left = ((ui.goalIdx + 1) % n) * box.clientWidth;
+        box.scrollTo({ left, behavior: 'smooth' });
+        // vài trình duyệt không cuộn mượt được → nhảy thẳng tới ảnh kế
+        setTimeout(() => { if (Math.abs(box.scrollLeft - left) > 2) box.scrollLeft = left; sync(); }, 800);
+    }, 5000);
 }
 
 // ---------- Màn: Hôm nay ----------
@@ -448,10 +489,13 @@ function goalHero() {
     const w = state.weight, left = round1(w.current - w.target);
     const text = left > 0 ? `Còn ${left} kg nữa là chạm ${w.target} kg` : `Đã đạt mục tiêu ${w.target} kg 🎉`;
     const lost = round1(w.start - w.current);
-    if (state.goal.photo) {
+    const photos = state.goal.photos;
+    if (photos.length) {
+        const idx = Math.min(ui.goalIdx || 0, photos.length - 1);
         return `<div class="goal-hero" data-act="goal">
-            <img src="${esc(state.goal.photo)}" alt="Ảnh mục tiêu">
+            <div class="goal-slides" id="goal-slides">${photos.map((p) => `<img src="${esc(p)}" alt="Ảnh mục tiêu">`).join('')}</div>
             <button class="icon-btn goal-hero-edit" data-act="goal"><i data-lucide="pencil"></i></button>
+            ${photos.length > 1 ? `<div class="goal-dots">${photos.map((_, i) => `<i class="${i === idx ? 'on' : ''}"></i>`).join('')}</div>` : ''}
             <div class="goal-hero-text"><h3>${text}</h3><p>${esc(state.goal.note || (lost > 0 ? `Đã giảm ${lost} kg. Tiếp tục nhé!` : 'Mỗi ngày một chút!'))}</p></div>
         </div>`;
     }
@@ -1018,28 +1062,40 @@ Trả về JSON: {"name":"","weight":0,"kcal":0,"macros":{"p":0,"c":0,"f":0},"it
 }
 
 // ---------- Ảnh mục tiêu ----------
+const GOAL_MAX = 8; // ảnh lưu thẳng trong database nên giới hạn số lượng
 function openGoal() {
     const g = state.goal;
     openSheet(`${sheetHead('Ảnh mục tiêu')}
-        <div class="goal-hero" style="aspect-ratio:4/5">${g.photo ? `<img src="${esc(g.photo)}" alt="">` : `<div class="goal-hero-empty"><i data-lucide="image"></i><b>Chưa có ảnh</b></div>`}</div>
+        ${g.photos.length ? `<div class="goal-grid">${g.photos.map((p, i) => `<div class="goal-thumb"><img src="${esc(p)}" alt="">
+            <button class="icon-btn" data-goal-del="${i}" title="Xoá ảnh này"><i data-lucide="x"></i></button></div>`).join('')}</div>`
+            : `<div class="goal-hero" style="aspect-ratio:4/5;max-width:240px;margin:0 auto 12px"><div class="goal-hero-empty"><i data-lucide="image"></i><b>Chưa có ảnh</b></div></div>`}
         <div class="grid2" style="margin-bottom:12px">
             <button class="btn" id="goal-upload"><i data-lucide="upload"></i>Tải ảnh lên</button>
             <button class="btn accent" id="goal-ai"><i data-lucide="wand-sparkles"></i>AI tạo từ ảnh tôi</button>
         </div>
-        <p class="small muted" style="margin-top:0">• <b>Tải ảnh lên</b>: ảnh dáng người bạn muốn có (ảnh cũ lúc gọn, hoặc hình mẫu).<br>• <b>AI tạo</b>: chọn 1 ảnh toàn thân hiện tại, AI vẽ bạn lúc đạt ${state.weight.target} kg.</p>
+        <p class="small muted" style="margin-top:0">• <b>Tải ảnh lên</b>: chọn được nhiều ảnh cùng lúc (tối đa ${GOAL_MAX} ảnh) — dáng người bạn muốn có, ảnh cũ lúc gọn hoặc hình mẫu. Nên dùng ảnh dọc.<br>• <b>AI tạo</b>: chọn 1 ảnh toàn thân hiện tại, AI vẽ bạn lúc đạt ${state.weight.target} kg.</p>
         <label class="field"><span>Câu nhắc bản thân (hiện trên ảnh)</span><input class="input" id="goal-note" maxlength="80" placeholder="VD: Tết này mặc vừa áo size M!" value="${esc(g.note)}"></label>
-        <div class="grid2"><button class="btn danger" id="goal-del" ${g.photo ? '' : 'disabled'}>Xoá ảnh</button><button class="btn ghost" id="goal-save">Lưu câu nhắc</button></div>
+        <div class="grid2"><button class="btn danger" id="goal-del" ${g.photos.length ? '' : 'disabled'}>Xoá tất cả</button><button class="btn ghost" id="goal-save">Lưu câu nhắc</button></div>
         <div id="goal-status" class="small muted" style="margin-top:10px"></div>`);
     const status = (t) => { $('#goal-status').innerHTML = t; };
-    const setPhoto = async (dataUrl) => {
-        status('<span class="spinner dark"></span> Đang lưu ảnh…');
+    const addPhotos = (list) => {
         // Lưu thẳng vào database: Firebase Storage của dự án đang báo 402 (cần gói trả phí)
-        state.goal.photo = dataUrl;
-        save('goal'); closeSheet(); toast('Đã cập nhật ảnh mục tiêu 💪'); render();
+        const room = GOAL_MAX - state.goal.photos.length;
+        if (room <= 0) return toast(`Tối đa ${GOAL_MAX} ảnh, hãy xoá bớt trước`);
+        state.goal.photos.push(...list.slice(0, room));
+        ui.goalIdx = state.goal.photos.length - 1;
+        save('goal'); toast(list.length > room ? `Chỉ thêm được ${room} ảnh (tối đa ${GOAL_MAX})` : 'Đã cập nhật ảnh mục tiêu 💪');
+        openGoal(); render();
     };
+    $$('[data-goal-del]').forEach((b) => b.onclick = () => {
+        if (!confirm('Xoá ảnh này?')) return;
+        state.goal.photos.splice(+b.dataset.goalDel, 1);
+        save('goal'); openGoal(); render();
+    });
     $('#goal-upload').onclick = async () => {
-        const f = await pickImage(); if (!f) return;
-        setPhoto(await compressImage(f, 900, 0.78));
+        const files = await pickImages(); if (!files.length) return;
+        status('<span class="spinner dark"></span> Đang lưu ảnh…');
+        addPhotos(await Promise.all(files.slice(0, GOAL_MAX).map((f) => compressImage(f, 900, 0.75))));
     };
     $('#goal-ai').onclick = async () => {
         if (!GEMINI_KEY) return toast('Cần Gemini API Key để dùng AI');
@@ -1057,13 +1113,13 @@ function openGoal() {
                 const sc = Math.min(1, 900 / Math.max(img.width, img.height));
                 c.width = img.width * sc; c.height = img.height * sc;
                 c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-                setPhoto(c.toDataURL('image/jpeg', 0.8));
+                addPhotos([c.toDataURL('image/jpeg', 0.8)]);
             };
             img.src = out;
         } catch (e) { status(esc(aiErrorText(e))); }
     };
     $('#goal-save').onclick = () => { state.goal.note = $('#goal-note').value.trim(); save('goal'); closeSheet(); render(); };
-    $('#goal-del').onclick = () => { if (confirm('Xoá ảnh mục tiêu?')) { state.goal.photo = ''; save('goal'); closeSheet(); render(); } };
+    $('#goal-del').onclick = () => { if (confirm('Xoá tất cả ảnh mục tiêu?')) { state.goal.photos = []; save('goal'); closeSheet(); render(); } };
 }
 
 // ---------- Màn: Chạy 5K ----------
