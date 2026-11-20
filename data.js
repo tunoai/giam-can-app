@@ -82,7 +82,6 @@ const GYM_GROUPS = [
     { id: 'mine', name: '⭐ Máy hay tập' },
     { id: 'dumbbell', name: 'Tạ tay 5kg' },
     { id: 'chest', name: 'Ngực' },
-    { id: 'biceps', name: 'Tay trước' },
     { id: 'basic', name: 'Cơ bản khác' }
 ];
 
@@ -125,12 +124,12 @@ const GYM_EXERCISES = [
         video: 'pec deck fly máy ép ngực hướng dẫn'
     },
     {
-        id: 'assisted-pullup', group: 'mine', assist: true, name: 'Hít xà có hỗ trợ (tay rộng)', en: 'Assisted Pull-up', emoji: '🧗',
+        id: 'assisted-pullup', group: 'mine', assist: true, name: 'Hít xà có hỗ trợ (tay rộng)', en: 'Assisted Pull-up · máy Elip Pri13', emoji: '🧗',
         target: 'Lưng xô, lưng giữa, tay trước',
         setup: [
             'Đây là máy hỗ trợ: tạ càng NẶNG thì càng DỄ (tạ đẩy bạn lên). Người mới nên chọn khoảng 50–60% cân nặng cơ thể.',
-            'Kéo đệm gối xuống, bước lên 2 bậc đứng, quỳ lần lượt từng gối lên đệm.',
-            'Nắm 2 tay cầm ngoài cùng của thanh xà phía trên, rộng hơn vai, lòng bàn tay hướng ra trước.'
+            'Máy Elip Pri13: bước lên 2 bậc đứng hai bên, nắm tay cầm phía trên, rồi quỳ lần lượt từng gối lên đệm đen ở giữa (đệm sẽ hạ xuống theo người).',
+            'Nắm 2 tay cầm chếch xuống ở hai đầu thanh xà phía trên, rộng hơn vai, lòng bàn tay hướng ra trước.'
         ],
         steps: [
             'Bắt đầu với tay gần duỗi thẳng, ưỡn ngực, siết bụng, mắt nhìn lên thanh xà.',
@@ -144,11 +143,11 @@ const GYM_EXERCISES = [
         video: 'assisted pull up machine hướng dẫn'
     },
     {
-        id: 'assisted-chinup', group: 'mine', assist: true, name: 'Hít xà có hỗ trợ (tay hẹp)', en: 'Assisted Chin-up / Neutral grip', emoji: '🙌',
+        id: 'assisted-chinup', group: 'mine', assist: true, name: 'Hít xà có hỗ trợ (tay hẹp)', en: 'Assisted Chin-up / Neutral grip · máy Elip Pri13', emoji: '🙌',
         target: 'Tay trước, lưng xô',
         setup: [
             'Chọn tạ hỗ trợ như bài hít xà tay rộng (bài này thường dễ hơn, có thể bớt 5 kg hỗ trợ).',
-            'Quỳ lên đệm gối, nắm 2 tay cầm song song ở giữa thanh xà (lòng bàn tay hướng vào nhau).'
+            'Quỳ lên đệm gối, nắm 2 tay cầm song song ở giữa thanh xà trên cùng (lòng bàn tay hướng vào nhau).'
         ],
         steps: [
             'Tay gần duỗi thẳng, ngực ưỡn, khuỷu tay hướng về trước.',
@@ -160,11 +159,11 @@ const GYM_EXERCISES = [
         video: 'assisted chin up neutral grip hướng dẫn'
     },
     {
-        id: 'assisted-dip', group: 'mine', assist: true, name: 'Nhúng xà có hỗ trợ', en: 'Assisted Dip', emoji: '⏬',
+        id: 'assisted-dip', group: 'mine', assist: true, name: 'Nhúng xà có hỗ trợ', en: 'Assisted Dip · máy Elip Pri13', emoji: '⏬',
         target: 'Tay sau, ngực dưới, vai trước',
         setup: [
             'Chọn tạ hỗ trợ (nặng = dễ). Người mới nên bắt đầu khoảng 50–60% cân nặng.',
-            'Quỳ lên đệm gối, nắm 2 thanh song song ở tầng giữa của máy (tay cầm nhúng xà), lòng bàn tay hướng vào nhau.'
+            'Quỳ lên đệm gối, nắm 2 tay cầm nhúng xà chĩa ra trước ở tầng giữa của máy (ngang hông khi đứng trên bậc), lòng bàn tay hướng vào nhau.'
         ],
         steps: [
             'Bắt đầu tay duỗi gần thẳng, vai hạ xuống xa tai, người hơi nghiêng về trước.',
@@ -192,20 +191,24 @@ const GYM_EXERCISES = [
         video: 'hít đất đúng cách cho người mới'
     },
     {
-        id: 'machine-curl', group: 'biceps', name: 'Máy cuốn tay trước', en: 'Biceps Curl / Preacher Machine', emoji: '💪',
-        target: 'Cơ tay trước (bắp tay)',
+        id: 'machine-curl', group: 'mine', name: 'Máy cuốn tay trước (TGP-340)', en: 'Seated Biceps Curl Machine', emoji: '💪',
+        target: 'Cơ tay trước (bắp tay), cẳng tay',
         setup: [
-            'Chỉnh ghế sao cho nách chạm sát mép trên đệm tì tay.',
-            'Khuỷu tay phải thẳng hàng với trục xoay của máy (thường có chấm màu đánh dấu).'
+            'Ngồi lên ghế, mặt quay về phía chồng tạ, ngực áp vào mép trên của đệm tì tay nghiêng.',
+            'Chỉnh độ cao ghế (cần gạt/ty hơi dưới ghế) sao cho nách chạm sát mép trên đệm, mặt sau cánh tay nằm phẳng trên đệm.',
+            'Khuỷu tay phải thẳng hàng với trục xoay tròn ở đầu tay đòn. Lệch trục là nguyên nhân chính gây đau khuỷu.',
+            'Cắm chốt chọn tạ ở mức nhẹ cho buổi đầu: cuốn được 12 lần, 2 lần cuối thấy nặng là vừa.'
         ],
         steps: [
-            'Nắm tay cầm, lòng bàn tay ngửa lên, cổ tay thẳng.',
-            'Thở ra, cuốn tay lên tới khi bắp tay co hết, siết 1 giây.',
-            'Hít vào, hạ xuống chậm trong 2–3 giây, gần duỗi thẳng nhưng không thả lỏng hoàn toàn.'
+            'Nắm hai tay cầm của tay đòn, lòng bàn tay ngửa lên, cổ tay thẳng, hai chân đặt vững trên sàn.',
+            'Bắt đầu với tay gần duỗi thẳng (khuỷu hơi cong, tạ chưa chạm chồng).',
+            'Thở ra, cuốn tay đòn lên về phía vai tới khi bắp tay co hết, siết 1 giây.',
+            'Hít vào, hạ xuống chậm trong 2–3 giây, gần duỗi thẳng nhưng không để tạ chạm chồng và không khóa cứng khuỷu.',
+            'Lưng, ngực và cánh tay trên áp đệm suốt bài, chỉ cẳng tay chuyển động.'
         ],
-        mistakes: ['Nhấc mông khỏi ghế để kéo', 'Ghế sai độ cao, khuỷu tay lệch trục', 'Gập cổ tay vào trong'],
-        sets: '3 hiệp × 10–12 lần, nghỉ 60 giây',
-        video: 'biceps curl machine hướng dẫn'
+        mistakes: ['Nhấc mông hoặc ngả người ra sau để kéo', 'Ghế sai độ cao, khuỷu tay lệch trục xoay', 'Duỗi thẳng khóa khuỷu ở dưới, dễ đau khớp', 'Gập cổ tay vào trong', 'Thả tạ rơi nhanh, đập vào chồng tạ'],
+        sets: '3 hiệp × 10–12 lần, nghỉ 60 giây. Đủ 12 lần cả 3 hiệp thì tăng 1 nấc tạ',
+        video: 'seated biceps curl machine hướng dẫn'
     },
     {
         id: 'db-curl', group: 'dumbbell', name: 'Cuốn tạ tay (tay trước)', en: 'Dumbbell Curl', emoji: '🥊',
@@ -234,16 +237,21 @@ const GYM_EXERCISES = [
         video: 'hammer curl hướng dẫn'
     },
     {
-        id: 'lat-pulldown', group: 'basic', name: 'Máy kéo xô', en: 'Lat Pulldown', emoji: '⬇️',
-        target: 'Lưng xô, tay trước',
-        setup: ['Chỉnh đệm gối để đùi được giữ chặt khi ngồi.', 'Nắm thanh rộng hơn vai một chút, lòng bàn tay hướng ra trước.'],
-        steps: [
-            'Ngồi thẳng, ngả người ra sau khoảng 10–15°, ưỡn ngực.',
-            'Thở ra, kéo thanh xuống ngang cằm hoặc ngực trên, nghĩ là kéo bằng khuỷu tay.',
-            'Hít vào, trả thanh lên chậm tới khi tay gần thẳng.'
+        id: 'lat-pulldown', group: 'mine', name: 'Máy kéo xô (thanh dài)', en: 'Lat Pulldown', emoji: '⬇️',
+        target: 'Lưng xô (giúp lưng rộng, eo trông nhỏ hơn), lưng giữa, tay trước',
+        setup: [
+            'Cắm chốt chọn tạ ở mức nhẹ cho buổi đầu: kéo được 12 lần đúng tư thế, 2 lần cuối thấy nặng là vừa.',
+            'Ngồi quay mặt vào máy, chỉnh đệm giữ đùi (nếu có) sao cho đùi bị ép chặt, người không bị kéo nhổm lên.',
+            'Đứng dậy nắm thanh dài ở chỗ cong hai đầu, rộng hơn vai khoảng 1,5 lần, lòng bàn tay hướng ra trước, rồi ngồi xuống kéo thanh theo.'
         ],
-        mistakes: ['Kéo thanh ra sau gáy', 'Ngả người quá nhiều, dùng đà', 'Nhún vai'],
-        sets: '3 hiệp × 10–12 lần',
+        steps: [
+            'Bắt đầu tay gần duỗi thẳng phía trên đầu, ưỡn ngực, ngả người ra sau nhẹ khoảng 10–15°.',
+            'Hạ vai xuống xa tai trước, rồi thở ra và kéo thanh xuống trước mặt tới ngang cằm hoặc ngực trên. Nghĩ là kéo khuỷu tay xuống và ra sau, không kéo bằng bàn tay.',
+            'Siết lưng 1 giây ở dưới, hai bả vai ép vào nhau.',
+            'Hít vào, trả thanh lên chậm 2–3 giây tới khi tay gần thẳng, vai được kéo căng nhẹ, tạ không chạm chồng.'
+        ],
+        mistakes: ['Kéo thanh ra sau gáy, rất dễ đau vai cổ', 'Ngả người quá nhiều, giật người dùng đà', 'Nhún vai lên tai khi kéo', 'Thả thanh bật lên nhanh, tạ đập vào chồng'],
+        sets: '3 hiệp × 10–12 lần, nghỉ 60–90 giây. Đủ 12 lần cả 3 hiệp thì tăng 1 nấc tạ',
         video: 'lat pulldown hướng dẫn'
     },
     {
@@ -340,7 +348,7 @@ const GYM_EXERCISES = [
 ];
 
 const GYM_TEMPLATES = [
-    { id: 'M', name: '⭐ Buổi của tôi: ép ngực + hít xà + tạ tay', items: ['pec-deck', 'assisted-pullup', 'assisted-dip', 'db-curl', 'db-shoulder-press', 'db-lateral'] },
+    { id: 'M', name: '⭐ Buổi của tôi: ép ngực + hít xà + kéo xô + máy tay trước + tạ tay', items: ['pec-deck', 'assisted-pullup', 'lat-pulldown', 'assisted-dip', 'machine-curl', 'db-shoulder-press', 'db-lateral'] },
     { id: 'A', name: 'Buổi A: Ngực + Tay trước', items: ['chest-press', 'pec-deck', 'machine-curl', 'hammer-curl', 'assisted-chinup'] },
     { id: 'B', name: 'Buổi B: Toàn thân + tạ tay', items: ['db-goblet-squat', 'leg-press', 'seated-row', 'db-row', 'db-triceps', 'push-up'] }
 ];
