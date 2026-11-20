@@ -45,7 +45,7 @@ const DEFAULT_STATE = {
     food: { log: {}, favorites: [] },
     checkins: {},
     run: { startDate: null, days: [1, 3, 5], log: {}, extra: [] },
-    gym: { log: {} },
+    gym: { log: {}, ms: {} },
     goal: { photos: [], note: '' },
     library: [],
     _meta: null
@@ -74,6 +74,7 @@ function normalize(raw) {
     s.run.extra = toArr(s.run.extra);
     s.run.days = toArr(s.run.days).map(Number);
     s.gym.log = s.gym.log || {};
+    s.gym.ms = s.gym.ms && typeof s.gym.ms === 'object' ? s.gym.ms : {};
     for (const k of Object.keys(s.gym.log)) {
         s.gym.log[k] = toArr(s.gym.log[k]).map((e) => ({ ...e, sets: toArr(e.sets) }));
     }
@@ -1457,8 +1458,9 @@ function renderGym() {
     <div class="card" style="padding:6px 16px">
         ${GYM_EXERCISES.filter((e) => e.group === ui.gymGroup).map((e) => {
             const last = lastSetsOf(e.id);
-            return `<button class="ex-item" data-act="gym-ex" data-id="${e.id}">${EX_MEDIA[e.id] ? `<div class="ex-emoji ex-thumb"><img src="img/ex/${EX_MEDIA[e.id].img}-1.jpg" alt="" loading="lazy"></div>` : `<div class="ex-emoji">${e.emoji}</div>`}
-            <div class="grow"><b>${e.name}</b><span>${e.en} · ${e.target}</span>${last ? `<span style="display:block;color:var(--gym)">Lần trước: ${last.sets.map((s) => `${s.kg || 0}kg×${s.reps}`).join(', ')}</span>` : ''}</div>
+            const rm = GYM_ROADMAPS[e.id], msN = rm ? rm.filter((_, i) => msDone(e.id)['m' + i]).length : 0;
+            return `<button class="ex-item" data-act="gym-ex" data-id="${e.id}">${EX_MEDIA[e.id]?.img ? `<div class="ex-emoji ex-thumb"><img src="img/ex/${EX_MEDIA[e.id].img}-1.jpg" alt="" loading="lazy"></div>` : `<div class="ex-emoji">${e.emoji}</div>`}
+            <div class="grow"><b>${e.name}</b><span>${e.en} · ${e.target}</span>${last ? `<span style="display:block;color:var(--gym)">Lần trước: ${last.sets.map((s) => `${s.kg || 0}kg×${s.reps}`).join(', ')}</span>` : ''}${rm ? `<span style="display:block;color:var(--gym)">🏁 Lộ trình: ${msN}/${rm.length} cột mốc</span>` : ''}</div>
             <i data-lucide="chevron-right" class="muted"></i></button>`;
         }).join('')}
     </div>
@@ -1471,14 +1473,73 @@ function renderGym() {
     </div>`;
 }
 
+// ---------- Lộ trình tập (cột mốc) ----------
+const msDone = (id) => state.gym.ms[id] || {};
+function msKg(m) {
+    const bw = num(state.weight.current, 75);
+    const m2 = /^\{bw([\d.]+)\}$/.exec(m.kg);
+    const kg = m2 ? Math.max(2.5, Math.round(bw * +m2[1] / 2.5) * 2.5) : num(m.kg);
+    return kg;
+}
+const kgStr = (kg) => String(kg).replace('.', ',');
+function nextMilestone(id) {
+    const rm = GYM_ROADMAPS[id];
+    if (!rm) return null;
+    const done = msDone(id);
+    const i = rm.findIndex((_, k) => !done['m' + k]);
+    return rm[i < 0 ? rm.length - 1 : i];
+}
+function roadmapCard(id) {
+    const e = GYM_EXERCISES.find((x) => x.id === id), rm = GYM_ROADMAPS[id];
+    if (!rm) return '';
+    const done = msDone(id), n = rm.filter((_, i) => done['m' + i]).length;
+    const nextI = rm.findIndex((_, i) => !done['m' + i]);
+    return `<div class="card" id="ms-card">
+        <div class="card-title">🏁 Lộ trình tập <span class="badge gym">${n}/${rm.length} cột mốc</span></div>
+        <div class="progress"><i style="width:${Math.round(n / rm.length * 100)}%;background:var(--gym)"></i></div>
+        ${e.freq ? `<p class="small" style="margin:10px 0 0"><b>Tần suất:</b> ${e.freq}</p>` : ''}
+        <p class="small muted" style="margin:8px 0 4px">Số kg tính theo cân nặng hiện tại của bạn (${kgStr(num(state.weight.current, 75))} kg), mỗi máy có thể lệch vài kg: chọn nấc gần nhất. Tập đủ số lần ở mọi hiệp, đúng tư thế, thì chạm ô vuông để đánh dấu đạt và chuyển sang mốc sau.</p>
+        ${rm.map((m, i) => {
+            const ok = !!done['m' + i], kg = msKg(m);
+            return `<div class="ms-item ${ok ? 'done' : ''} ${i === nextI ? 'next' : ''}">
+                <button class="check-box" data-act="ms-toggle" data-ex="${id}" data-i="${i}" aria-label="Đánh dấu đạt cột mốc">${ok ? '<i data-lucide="check"></i>' : ''}</button>
+                <div class="grow">
+                    <div class="ms-when">${m.w}${i === nextI ? ' · <b>Đang tập</b>' : ''}</div>
+                    <b class="ms-title">${m.t}</b>
+                    <div class="ms-spec">
+                        <span>${e.assist ? 'Hỗ trợ' : 'Tạ'} <b>${kg ? kgStr(kg) + ' kg' : '0 kg (tự lực)'}</b></span>
+                        <span><b>${m.sets}</b> hiệp/buổi</span>
+                        <span><b>${m.reps}</b> lần/hiệp</span>
+                    </div>
+                    ${m.d ? `<div class="small muted">${m.d}</div>` : ''}
+                    ${ok ? `<div class="small" style="color:var(--gym);margin-top:2px">✓ Đạt ngày ${ddmm(done['m' + i])}</div>` : ''}
+                </div></div>`;
+        }).join('')}
+    </div>`;
+}
+function toggleMilestone(id, i) {
+    const m = state.gym.ms[id] = state.gym.ms[id] || {};
+    const k = 'm' + i;
+    if (m[k]) delete m[k];
+    else { m[k] = todayKey(); if (navigator.vibrate) navigator.vibrate(60); }
+    if (!Object.keys(m).length) delete state.gym.ms[id];
+    save('gym');
+    const card = $('#ms-card');
+    if (card) { card.outerHTML = roadmapCard(id); icons(); }
+    if (m[k]) toast(GYM_ROADMAPS[id].every((_, j) => (state.gym.ms[id] || {})['m' + j]) ? 'Hoàn thành cả lộ trình! 🏆' : 'Đạt cột mốc 💪');
+    requestRender();
+}
+
 function openExercise(id) {
     const e = GYM_EXERCISES.find((x) => x.id === id);
     const last = lastSetsOf(id);
+    const media = EX_MEDIA[e.id];
     openSheet(`${sheetHead(e.emoji + ' ' + e.name)}
         <div class="small muted" style="margin:-8px 0 12px">${e.en} · Cơ chính: ${e.target}</div>
-        ${EX_MEDIA[e.id] ? `${exAnim(EX_MEDIA[e.id].img, 'detail-anim')}
-            ${e.assist ? '<p class="small muted" style="margin:6px 0 0">Ảnh minh hoạ động tác hít xà/nhúng xà tự do; trên máy hỗ trợ bạn quỳ gối lên đệm, chuyển động giống hệt.</p>' : ''}
-            <div style="margin:10px 0 12px">${videoBtn(EX_MEDIA[e.id].yt)}</div>` : ''}
+        ${media?.img ? `${exAnim(media.img, 'detail-anim')}
+            ${e.assist ? '<p class="small muted" style="margin:6px 0 0">Ảnh minh hoạ động tác nhúng xà tự do; trên máy hỗ trợ bạn quỳ gối lên đệm, chuyển động giống hệt.</p>' : ''}` : ''}
+        ${media?.yt ? `<div style="margin:10px 0 12px">${videoBtn(media.yt)}</div>` : ''}
+        ${roadmapCard(e.id)}
         <div class="card"><div class="card-title">1. Chỉnh máy</div><ol class="ol">${e.setup.map((s) => `<li>${s}</li>`).join('')}</ol></div>
         <div class="card"><div class="card-title">2. Cách tập</div><ol class="ol">${e.steps.map((s) => `<li>${s}</li>`).join('')}</ol></div>
         <div class="card"><div class="card-title">Lỗi hay gặp</div><ul class="warn-list">${e.mistakes.map((s) => `<li>${s}</li>`).join('')}</ul></div>
@@ -1494,11 +1555,14 @@ function openGymSession(templateId) {
     const rows = t.items.map((id) => {
         const e = GYM_EXERCISES.find((x) => x.id === id);
         const prev = existing.find((x) => x.ex === id)?.sets || lastSetsOf(id)?.sets || [];
-        const sets = [0, 1, 2].map((i) => prev[i] || prev[prev.length - 1] || { kg: e.group === 'dumbbell' ? 5 : '', reps: 12 });
+        const ms = nextMilestone(id);
+        const def = ms ? { kg: msKg(ms), reps: parseInt(ms.reps, 10) || 10 } : { kg: e.group === 'dumbbell' ? 5 : '', reps: 12 };
+        const sets = Array.from({ length: ms ? ms.sets : 3 }, (_, i) => prev[i] || prev[prev.length - 1] || def);
         return `<div class="card" data-ex="${id}">
-            <div class="row" style="margin-bottom:8px">${EX_MEDIA[id] ? `<div class="ex-emoji ex-thumb"><img src="img/ex/${EX_MEDIA[id].img}-1.jpg" alt=""></div>` : `<div class="ex-emoji">${e.emoji}</div>`}
+            <div class="row" style="margin-bottom:8px">${EX_MEDIA[id]?.img ? `<div class="ex-emoji ex-thumb"><img src="img/ex/${EX_MEDIA[id].img}-1.jpg" alt=""></div>` : `<div class="ex-emoji">${e.emoji}</div>`}
                 <b class="grow">${e.name}</b><button class="btn sm ghost" data-act="gym-ex" data-id="${id}">Cách tập</button></div>
             ${e.assist ? '<div class="small" style="color:var(--gym);margin-bottom:6px">Máy hỗ trợ: tạ càng nặng càng dễ. Mục tiêu là giảm dần số kg.</div>' : ''}
+            ${ms ? `<div class="small muted" style="margin-bottom:6px">🏁 Mốc đang tập (${ms.w}): ${e.assist ? 'hỗ trợ ' : ''}${kgStr(msKg(ms))} kg · ${ms.sets} hiệp × ${ms.reps} lần</div>` : ''}
             <div class="set-row small muted"><span>#</span><span>${e.assist ? 'Hỗ trợ (kg)' : 'Tạ (kg)'}</span><span>Số lần</span><span></span></div>
             ${sets.map((s, i) => `<div class="set-row"><span class="muted">${i + 1}</span>
                 <input class="input" type="number" inputmode="decimal" data-k="kg" value="${s.kg ?? ''}" placeholder="kg">
@@ -1728,6 +1792,7 @@ const actions = {
     'lib-add': () => addLibPhotos(),
     'gym-group': (d) => { ui.gymGroup = d.id; render(); },
     'gym-ex': (d) => openExercise(d.id),
+    'ms-toggle': (d) => toggleMilestone(d.ex, +d.i),
     'gym-start': (d) => openGymSession(d.id),
     'w-range': (d) => { ui.weightRange = +d.v; render(); },
     'w-add': () => addWeight($('#w-date').value || todayKey(), num($('#w-kg').value)),

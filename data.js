@@ -124,45 +124,33 @@ const GYM_EXERCISES = [
         video: 'pec deck fly máy ép ngực hướng dẫn'
     },
     {
-        id: 'assisted-pullup', group: 'mine', assist: true, name: 'Hít xà có hỗ trợ (tay rộng)', en: 'Assisted Pull-up · máy Elip Pri13', emoji: '🧗',
-        target: 'Lưng xô, lưng giữa, tay trước',
+        id: 'pri13-pullup', group: 'mine', assist: true, name: 'Hít xà trên máy Elip Pri13', en: 'Assisted Pull-up · tay rộng', emoji: '🧗',
+        target: 'Vai sau, lưng xô (lưng rộng hình chữ V), lưng giữa, tay trước',
+        freq: '2–3 buổi/tuần, cách ngày (VD: T2–T4–T6). Tập bài này ĐẦU buổi khi còn khoẻ.',
         setup: [
-            'Đây là máy hỗ trợ: tạ càng NẶNG thì càng DỄ (tạ đẩy bạn lên). Người mới nên chọn khoảng 50–60% cân nặng cơ thể.',
-            'Máy Elip Pri13: bước lên 2 bậc đứng hai bên, nắm tay cầm phía trên, rồi quỳ lần lượt từng gối lên đệm đen ở giữa (đệm sẽ hạ xuống theo người).',
-            'Nắm 2 tay cầm chếch xuống ở hai đầu thanh xà phía trên, rộng hơn vai, lòng bàn tay hướng ra trước.'
+            'Đây là máy hỗ trợ: tạ càng NẶNG thì càng DỄ (tạ đẩy bạn lên). Mức kg cụ thể xem ở phần Lộ trình bên dưới.',
+            'Cắm chốt vào chồng tạ ở mức kg của cột mốc bạn đang tập.',
+            'Bước lên 2 bậc đứng hai bên, với tay nắm thanh xà trên cùng, rồi quỳ lần lượt từng gối lên đệm đen ở giữa (đệm hạ xuống theo người).',
+            'Nắm 2 tay cầm chếch xuống ở hai đầu thanh xà, rộng hơn vai, lòng bàn tay hướng ra trước. Cách nắm này dồn lực vào vai sau và lưng xô.'
         ],
         steps: [
-            'Bắt đầu với tay gần duỗi thẳng, ưỡn ngực, siết bụng, mắt nhìn lên thanh xà.',
-            'Thở ra, kéo người lên bằng cách kéo khuỷu tay xuống và ra sau, tới khi cằm cao hơn thanh xà.',
-            'Siết lưng 1 giây ở trên cùng.',
-            'Hít vào, hạ người xuống chậm 2–3 giây tới khi tay gần thẳng.',
+            'Bắt đầu tay gần duỗi thẳng, ưỡn ngực, siết bụng, mắt nhìn lên xà.',
+            'Hạ vai xuống xa tai trước (như ép bả vai vào túi quần sau), rồi mới bắt đầu kéo.',
+            'Thở ra, kéo khuỷu tay xuống và ra sau, đưa ngực lên phía xà tới khi cằm qua xà.',
+            'Siết lưng và vai sau 1 giây ở trên cùng.',
+            'Hít vào, hạ người chậm 2–3 giây tới khi tay gần thẳng (không thả rơi).',
             'Xong hiệp: bước chân xuống bậc đứng TỪNG CHÂN một rồi mới buông tay.'
         ],
-        mistakes: ['Buông tay khi gối còn trên đệm, đệm bật lên rất nguy hiểm', 'Đung đưa người, đá chân lấy đà', 'Nhún vai, rụt cổ khi kéo', 'Chỉ kéo nửa đường'],
-        sets: '3 hiệp × 8–10 lần. Tiến bộ = GIẢM dần tạ hỗ trợ (bớt 2,5–5 kg sau mỗi 1–2 tuần)',
+        mistakes: ['Buông tay khi gối còn trên đệm, đệm bật lên rất nguy hiểm', 'Nhún vai, rụt cổ khi kéo (dễ đau vai cổ)', 'Đung đưa người, đá chân lấy đà', 'Chỉ kéo nửa đường hoặc thả rơi khi hạ', 'Giảm tạ hỗ trợ quá nhanh khi chưa đủ số lần'],
+        sets: 'Theo cột mốc đang tập trong Lộ trình. Nghỉ 90 giây – 2 phút giữa các hiệp',
         video: 'assisted pull up machine hướng dẫn'
-    },
-    {
-        id: 'assisted-chinup', group: 'mine', assist: true, name: 'Hít xà có hỗ trợ (tay hẹp)', en: 'Assisted Chin-up / Neutral grip · máy Elip Pri13', emoji: '🙌',
-        target: 'Tay trước, lưng xô',
-        setup: [
-            'Chọn tạ hỗ trợ như bài hít xà tay rộng (bài này thường dễ hơn, có thể bớt 5 kg hỗ trợ).',
-            'Quỳ lên đệm gối, nắm 2 tay cầm song song ở giữa thanh xà trên cùng (lòng bàn tay hướng vào nhau).'
-        ],
-        steps: [
-            'Tay gần duỗi thẳng, ngực ưỡn, khuỷu tay hướng về trước.',
-            'Thở ra, kéo người lên tới khi cằm qua tay cầm, khuỷu tay đi sát thân.',
-            'Hít vào, hạ chậm xuống.'
-        ],
-        mistakes: ['Hạ người quá nhanh', 'Ngửa cổ ra sau để "với" cằm lên'],
-        sets: '3 hiệp × 8–10 lần',
-        video: 'assisted chin up neutral grip hướng dẫn'
     },
     {
         id: 'assisted-dip', group: 'mine', assist: true, name: 'Nhúng xà có hỗ trợ', en: 'Assisted Dip · máy Elip Pri13', emoji: '⏬',
         target: 'Tay sau, ngực dưới, vai trước',
         setup: [
-            'Chọn tạ hỗ trợ (nặng = dễ). Người mới nên bắt đầu khoảng 50–60% cân nặng.',
+            'Đây là máy hỗ trợ: tạ càng NẶNG thì càng DỄ (tạ đẩy bạn lên). Người mới nên chọn khoảng 50–60% cân nặng cơ thể.',
+            'Máy Elip Pri13: bước lên 2 bậc đứng hai bên, nắm tay cầm, rồi quỳ lần lượt từng gối lên đệm đen ở giữa (đệm sẽ hạ xuống theo người).',
             'Quỳ lên đệm gối, nắm 2 tay cầm nhúng xà chĩa ra trước ở tầng giữa của máy (ngang hông khi đứng trên bậc), lòng bàn tay hướng vào nhau.'
         ],
         steps: [
@@ -170,7 +158,7 @@ const GYM_EXERCISES = [
             'Hít vào, gập khuỷu tay hạ người xuống chậm tới khi cánh tay trên song song sàn (khoảng 90°).',
             'Thở ra, đẩy người lên tới khi tay gần thẳng, không khóa cứng khuỷu.'
         ],
-        mistakes: ['Hạ quá sâu khiến vai bị kéo căng, dễ đau vai', 'Khuỷu tay bè rộng ra hai bên', 'Nhún vai lên tai'],
+        mistakes: ['Buông tay khi gối còn trên đệm, đệm bật lên rất nguy hiểm. Xong hiệp: bước xuống bậc TỪNG CHÂN rồi mới buông tay', 'Hạ quá sâu khiến vai bị kéo căng, dễ đau vai', 'Khuỷu tay bè rộng ra hai bên', 'Nhún vai lên tai'],
         sets: '3 hiệp × 8–12 lần. Tiến bộ = giảm dần tạ hỗ trợ',
         video: 'assisted dip machine hướng dẫn'
     },
@@ -348,17 +336,88 @@ const GYM_EXERCISES = [
 ];
 
 const GYM_TEMPLATES = [
-    { id: 'M', name: '⭐ Buổi của tôi: ép ngực + hít xà + kéo xô + máy tay trước + tạ tay', items: ['pec-deck', 'assisted-pullup', 'lat-pulldown', 'assisted-dip', 'machine-curl', 'db-shoulder-press', 'db-lateral'] },
-    { id: 'A', name: 'Buổi A: Ngực + Tay trước', items: ['chest-press', 'pec-deck', 'machine-curl', 'hammer-curl', 'assisted-chinup'] },
+    { id: 'M', name: '⭐ Buổi của tôi: hít xà Pri13 + ngực + lưng + tay + vai', items: ['pri13-pullup', 'pec-deck', 'lat-pulldown', 'assisted-dip', 'machine-curl', 'db-shoulder-press', 'db-lateral'] },
+    { id: 'A', name: 'Buổi A: Ngực + Tay trước', items: ['chest-press', 'pec-deck', 'machine-curl', 'hammer-curl', 'lat-pulldown'] },
     { id: 'B', name: 'Buổi B: Toàn thân + tạ tay', items: ['db-goblet-squat', 'leg-press', 'seated-row', 'db-row', 'db-triceps', 'push-up'] }
 ];
+
+// --- Lộ trình tập cho từng máy (tick khi đạt cột mốc) ---
+// kg: '{bw0.5}' = 50% cân nặng hiện tại, làm tròn tới 2,5 kg (tự cập nhật khi cân nặng đổi)
+// w: thời gian · t: cột mốc · kg: mức tạ (máy hỗ trợ: tạ hỗ trợ) · sets: số hiệp mỗi buổi · reps: số lần mỗi hiệp · d: ghi chú
+const GYM_ROADMAPS = {
+    'pri13-pullup': [
+        { w: 'Tuần 1–2', t: 'Làm quen máy, học kéo đúng', kg: '{bw0.65}', sets: 3, reps: '6–8', d: 'Tay rộng hơn vai. Kéo tới cằm qua xà, hạ chậm 3 giây. Nghỉ 90 giây giữa các hiệp.' },
+        { w: 'Tuần 3–4', t: 'Đủ số lần', kg: '{bw0.6}', sets: 3, reps: '8–10', d: 'Cả 3 hiệp đều đủ 10 lần đúng tư thế thì sang mốc sau.' },
+        { w: 'Tuần 5–6', t: 'Thêm hiệp, giảm hỗ trợ lần 1', kg: '{bw0.5}', sets: 4, reps: '8', d: 'Ở trên cùng siết lưng và vai sau 1 giây.' },
+        { w: 'Tuần 7–9', t: 'Giảm hỗ trợ lần 2', kg: '{bw0.4}', sets: 4, reps: '8', d: 'Hiệp cuối được phép chỉ 6 lần.' },
+        { w: 'Tuần 10–12', t: 'Nửa đường tự lực', kg: '{bw0.3}', sets: 4, reps: '6–8', d: 'Nghỉ 2 phút giữa các hiệp nếu cần.' },
+        { w: 'Tháng 4', t: 'Gần tự lực', kg: '{bw0.2}', sets: 4, reps: '6', d: 'Không đung đưa, không đá chân.' },
+        { w: 'Tháng 5', t: 'Hỗ trợ rất nhẹ', kg: '{bw0.1}', sets: 3, reps: '5–6', d: 'Thử 1 lần không hỗ trợ ở cuối buổi.' },
+        { w: 'Tháng 6+', t: 'Hít xà tự lực', kg: '0', sets: 3, reps: '3–5', d: 'Rút chốt tạ hỗ trợ. Đạt được là cột mốc lớn!' }
+    ],
+    'assisted-dip': [
+        { w: 'Tuần 1', t: 'Lên xuống máy an toàn', kg: '{bw0.6}', sets: 2, reps: '8', d: 'Hạ tới khuỷu 90°. Xong hiệp bước xuống từng chân rồi mới buông tay.' },
+        { w: 'Tuần 2–3', t: 'Đủ 3 hiệp', kg: '{bw0.6}', sets: 3, reps: '10', d: 'Vai hạ xa tai suốt bài.' },
+        { w: 'Tuần 4–6', t: 'Giảm hỗ trợ lần 1', kg: '{bw0.45}', sets: 3, reps: '10', d: '' },
+        { w: 'Tuần 7–9', t: 'Giảm hỗ trợ lần 2', kg: '{bw0.3}', sets: 3, reps: '10', d: '' },
+        { w: 'Tuần 10–14', t: 'Gần tự lực', kg: '{bw0.15}', sets: 3, reps: '8', d: '' },
+        { w: 'Tháng 4+', t: 'Nhúng xà không hỗ trợ', kg: '0', sets: 3, reps: '5+', d: 'Rút chốt tạ hỗ trợ.' }
+    ],
+    'pec-deck': [
+        { w: 'Tuần 1', t: 'Làm quen máy', kg: '{bw0.2}', sets: 2, reps: '15', d: 'Tay nắm ngang ngực, không mở tay quá rộng.' },
+        { w: 'Tuần 2–3', t: 'Vững tư thế', kg: '{bw0.25}', sets: 3, reps: '15', d: 'Ép 1 giây, siết 1 giây, mở 3 giây.' },
+        { w: 'Tuần 4–5', t: 'Tăng tạ lần 1', kg: '{bw0.3}', sets: 3, reps: '12', d: '' },
+        { w: 'Tuần 6–8', t: 'Tăng tạ lần 2', kg: '{bw0.35}', sets: 3, reps: '12', d: '' },
+        { w: 'Tuần 9–12', t: 'Ngực khoẻ rõ', kg: '{bw0.45}', sets: 3, reps: '10–12', d: 'Siết 2 giây mỗi lần.' },
+        { w: 'Tháng 4+', t: 'Mục tiêu dài hạn', kg: '{bw0.55}', sets: 3, reps: '10', d: '' }
+    ],
+    'machine-curl': [
+        { w: 'Tuần 1', t: 'Làm quen máy TGP-340', kg: '{bw0.1}', sets: 2, reps: '12', d: 'Khuỷu thẳng trục xoay, không nhấc mông.' },
+        { w: 'Tuần 2–3', t: 'Vững tư thế', kg: '{bw0.12}', sets: 3, reps: '12', d: 'Hạ chậm 3 giây.' },
+        { w: 'Tuần 4–5', t: 'Tăng tạ lần 1', kg: '{bw0.15}', sets: 3, reps: '12', d: '' },
+        { w: 'Tuần 6–8', t: 'Tăng tạ lần 2', kg: '{bw0.2}', sets: 3, reps: '10–12', d: '' },
+        { w: 'Tuần 9–12', t: 'Bắp tay rõ nét', kg: '{bw0.25}', sets: 3, reps: '10', d: 'Siết 1 giây ở trên.' },
+        { w: 'Tháng 4+', t: 'Mục tiêu dài hạn', kg: '{bw0.3}', sets: 3, reps: '10', d: '' }
+    ],
+    'lat-pulldown': [
+        { w: 'Tuần 1', t: 'Làm quen máy', kg: '{bw0.3}', sets: 2, reps: '12', d: 'Kéo thanh xuống TRƯỚC mặt, không giật người.' },
+        { w: 'Tuần 2–3', t: 'Vững tư thế', kg: '{bw0.35}', sets: 3, reps: '12', d: 'Hạ vai trước rồi mới kéo.' },
+        { w: 'Tuần 4–6', t: 'Tăng tạ lần 1', kg: '{bw0.45}', sets: 3, reps: '10–12', d: '' },
+        { w: 'Tuần 7–10', t: 'Tăng tạ lần 2', kg: '{bw0.55}', sets: 3, reps: '10', d: '' },
+        { w: 'Tuần 11–16', t: 'Lưng rộng rõ', kg: '{bw0.7}', sets: 3, reps: '8–10', d: '' },
+        { w: 'Tháng 5+', t: 'Mục tiêu dài hạn', kg: '{bw0.85}', sets: 3, reps: '8', d: 'Không ngả người quá 15°.' }
+    ],
+    'chest-press': [
+        { w: 'Tuần 1', t: 'Làm quen máy', kg: '{bw0.25}', sets: 2, reps: '12', d: 'Tay cầm ngang giữa ngực.' },
+        { w: 'Tuần 2–3', t: 'Vững tư thế', kg: '{bw0.3}', sets: 3, reps: '12', d: 'Đưa về chậm 3 giây.' },
+        { w: 'Tuần 4–6', t: 'Tăng tạ lần 1', kg: '{bw0.4}', sets: 3, reps: '10–12', d: '' },
+        { w: 'Tuần 7–10', t: 'Tăng tạ lần 2', kg: '{bw0.5}', sets: 3, reps: '10', d: '' },
+        { w: 'Tuần 11–16', t: 'Ngực khoẻ rõ', kg: '{bw0.65}', sets: 3, reps: '8–10', d: '' },
+        { w: 'Tháng 5+', t: 'Mục tiêu dài hạn', kg: '{bw0.8}', sets: 3, reps: '8', d: '' }
+    ],
+    'seated-row': [
+        { w: 'Tuần 1', t: 'Làm quen máy', kg: '{bw0.3}', sets: 2, reps: '12', d: 'Lưng thẳng, ép bả vai mỗi lần.' },
+        { w: 'Tuần 2–3', t: 'Vững tư thế', kg: '{bw0.35}', sets: 3, reps: '12', d: '' },
+        { w: 'Tuần 4–6', t: 'Tăng tạ lần 1', kg: '{bw0.45}', sets: 3, reps: '10–12', d: '' },
+        { w: 'Tuần 7–10', t: 'Tăng tạ lần 2', kg: '{bw0.55}', sets: 3, reps: '10', d: '' },
+        { w: 'Tuần 11–16', t: 'Lưng dày rõ', kg: '{bw0.7}', sets: 3, reps: '8–10', d: '' },
+        { w: 'Tháng 5+', t: 'Mục tiêu dài hạn', kg: '{bw0.85}', sets: 3, reps: '8', d: 'Không gù lưng khi trả tạ.' }
+    ],
+    'leg-press': [
+        { w: 'Tuần 1', t: 'Làm quen máy', kg: '{bw0.6}', sets: 2, reps: '15', d: 'Chưa tính bàn trượt. Không khoá gối.' },
+        { w: 'Tuần 2–3', t: 'Vững tư thế', kg: '{bw0.8}', sets: 3, reps: '15', d: 'Hạ tới gối 90°.' },
+        { w: 'Tuần 4–6', t: 'Tăng tạ lần 1', kg: '{bw1}', sets: 3, reps: '12', d: '' },
+        { w: 'Tuần 7–10', t: 'Tăng tạ lần 2', kg: '{bw1.3}', sets: 3, reps: '12', d: '' },
+        { w: 'Tuần 11–16', t: 'Chân khoẻ rõ', kg: '{bw1.6}', sets: 3, reps: '10', d: '' },
+        { w: 'Tháng 5+', t: 'Mục tiêu dài hạn', kg: '{bw2}', sets: 3, reps: '10', d: 'Mông không cuộn khỏi ghế.' }
+    ]
+};
 
 
 // --- Ảnh minh hoạ (img/ex/<img>-0.jpg & -1.jpg, ảnh từ free-exercise-db, Unlicense) + video YouTube ---
 const EX_MEDIA = {
+    'pri13-pullup': { yt: 'qEqNik0ILRU' }, // không có ảnh đúng máy → chỉ có video
     'pec-deck': { img: 'pec-deck', yt: 'GIgoggFOHjs' },
-    'assisted-pullup': { img: 'assisted-pullup', yt: 'qEqNik0ILRU' },
-    'assisted-chinup': { img: 'assisted-chinup', yt: '2JOC9L_GXrA' },
     'assisted-dip': { img: 'assisted-dip', yt: 'huAAKl2rQDM' },
     'chest-press': { img: 'chest-press', yt: 'saiWPVjGD0M' },
     'push-up': { img: 'push-up', yt: 'PG6-_hBZCSc' },
