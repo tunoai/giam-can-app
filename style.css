@@ -425,3 +425,8 @@ textarea.input { height: auto; min-height: 72px; padding: 10px 14px; resize: non
 .ms-spec { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
 .ms-spec span { font-size: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px; }
 .ms-item.next .ms-spec span { background: #fff; }
+
+/* Hướng dẫn hít thở */
+.breath-row { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; }
+.breath-row + .breath-row { border-top: 1px solid var(--line); }
+.breath-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--gym-soft); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }

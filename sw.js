@@ -1,6 +1,6 @@
 // Service worker: lưu sẵn vỏ app để mở nhanh và dùng được khi mất mạng
-const CACHE = 'fitlife-v10';
-const SHELL = ['./', 'index.html', 'style.css?v=8', 'data.js?v=9', 'food-db.js?v=6', 'app.js?v=8', 'manifest.json', 'icon-192.png', 'tung_chu_avatar.png'];
+const CACHE = 'fitlife-v12';
+const SHELL = ['./', 'index.html', 'style.css?v=9', 'data.js?v=11', 'food-db.js?v=6', 'app.js?v=9', 'manifest.json', 'icon-192.png', 'tung_chu_avatar.png'];
 
 self.addEventListener('install', (e) => {
     e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

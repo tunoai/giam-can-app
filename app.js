@@ -1530,6 +1530,17 @@ function toggleMilestone(id, i) {
     requestRender();
 }
 
+function breathCard(id) {
+    const b = GYM_BREATH[id];
+    if (!b) return '';
+    return `<div class="card"><div class="card-title">3. Cách hít thở</div>
+        <div class="breath-row"><span class="breath-ico out">😮‍💨</span><div><b>Thở ra bằng miệng</b><div class="small">${b.out}</div></div></div>
+        <div class="breath-row"><span class="breath-ico">👃</span><div><b>Hít vào bằng mũi</b><div class="small">${b.in}</div></div></div>
+        ${b.tip ? `<div class="small" style="margin-top:8px">💡 ${b.tip}</div>` : ''}
+        <div class="small muted" style="margin-top:8px">Quy tắc chung: thở ra khi dùng sức (đẩy, kéo, nâng), hít vào khi trả tạ về. Không nín thở. Giữa các hiệp hít sâu bằng mũi, thở ra chậm bằng miệng.</div>
+    </div>`;
+}
+
 function openExercise(id) {
     const e = GYM_EXERCISES.find((x) => x.id === id);
     const last = lastSetsOf(id);
@@ -1542,6 +1553,7 @@ function openExercise(id) {
         ${roadmapCard(e.id)}
         <div class="card"><div class="card-title">1. Chỉnh máy</div><ol class="ol">${e.setup.map((s) => `<li>${s}</li>`).join('')}</ol></div>
         <div class="card"><div class="card-title">2. Cách tập</div><ol class="ol">${e.steps.map((s) => `<li>${s}</li>`).join('')}</ol></div>
+        ${breathCard(e.id)}
         <div class="card"><div class="card-title">Lỗi hay gặp</div><ul class="warn-list">${e.mistakes.map((s) => `<li>${s}</li>`).join('')}</ul></div>
         <div class="card"><div class="row"><i data-lucide="repeat"></i><b>${e.sets}</b></div>
             ${last ? `<div class="small muted" style="margin-top:6px">Lần trước (${fmtDay(last.date)}): ${last.sets.map((s) => `${s.kg || 0}kg × ${s.reps}`).join(', ')}</div>` : ''}</div>
@@ -1562,6 +1574,7 @@ function openGymSession(templateId) {
             <div class="row" style="margin-bottom:8px">${EX_MEDIA[id]?.img ? `<div class="ex-emoji ex-thumb"><img src="img/ex/${EX_MEDIA[id].img}-1.jpg" alt=""></div>` : `<div class="ex-emoji">${e.emoji}</div>`}
                 <b class="grow">${e.name}</b><button class="btn sm ghost" data-act="gym-ex" data-id="${id}">Cách tập</button></div>
             ${e.assist ? '<div class="small" style="color:var(--gym);margin-bottom:6px">Máy hỗ trợ: tạ càng nặng càng dễ. Mục tiêu là giảm dần số kg.</div>' : ''}
+            ${GYM_BREATH[id] ? `<div class="small muted" style="margin-bottom:4px">🌬️ Thở ra: ${GYM_BREATH[id].out.replace(/\.$/, '').toLowerCase()} · Hít vào: ${GYM_BREATH[id].in.replace(/\.$/, '').toLowerCase()}</div>` : ''}
             ${ms ? `<div class="small muted" style="margin-bottom:6px">🏁 Mốc đang tập (${ms.w}): ${e.assist ? 'hỗ trợ ' : ''}${kgStr(msKg(ms))} kg · ${ms.sets} hiệp × ${ms.reps} lần</div>` : ''}
             <div class="set-row small muted"><span>#</span><span>${e.assist ? 'Hỗ trợ (kg)' : 'Tạ (kg)'}</span><span>Số lần</span><span></span></div>
             ${sets.map((s, i) => `<div class="set-row"><span class="muted">${i + 1}</span>

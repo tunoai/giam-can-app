@@ -105,16 +105,17 @@ const GYM_EXERCISES = [
         video: 'chest press machine hướng dẫn'
     },
     {
-        id: 'pec-deck', group: 'mine', name: 'Máy ép ngực (tay nắm)', en: 'Pec Deck / Butterfly', emoji: '🦋',
+        id: 'pec-deck', group: 'mine', name: 'Máy ép ngực ngang (Chest Fly)', en: 'Machine Chest Fly / Pec Deck', emoji: '🦋',
         target: 'Ngực (phần trong và giữa), vai trước',
         setup: [
-            'Chỉnh độ cao ghế sao cho tay nắm ngang ngực; khi ngồi, tay dang ra ngang vai hoặc thấp hơn vai một chút (không cao hơn vai).',
-            'Nếu máy có chốt chỉnh tay đòn, chỉnh để lúc mở hết tay chỉ ngang thân hoặc ra sau một chút, không quá rộng.',
-            'Chọn mức tạ ép được 12–15 lần chậm rãi, 2–3 lần cuối thấy nặng là vừa.'
+            'Cắm chốt chọn tạ ở mức của cột mốc đang tập (xem phần Lộ trình ở trên).',
+            'Chỉnh độ cao ghế: ngồi thoải mái, hai bàn chân đặt tự nhiên trên sàn, hai càng máy (tay nắm) ở vị trí ngang ngực.',
+            'Khi dang tay ra nắm, cổ tay, khuỷu tay và vai nằm trên một đường ngang: khuỷu không cao hơn vai, cũng không thấp hơn vai.',
+            'Nếu máy có chốt chỉnh tay đòn, chỉnh để lúc mở hết tay chỉ ngang thân hoặc ra sau một chút, không quá rộng.'
         ],
         steps: [
-            'Ngồi lưng áp sát đệm, hai chân đặt vững trên sàn, ưỡn ngực, kéo hai bả vai ra sau và xuống.',
-            'Nắm hai tay nắm dọc, khuỷu tay hơi cong nhẹ và giữ nguyên góc này suốt bài.',
+            'Ngồi lưng áp sát đệm, ưỡn ngực, kéo hai bả vai ra sau và xuống.',
+            'Nắm hai tay nắm dọc (lòng bàn tay hướng vào nhau), khuỷu tay hơi cong nhẹ và giữ nguyên góc này suốt bài.',
             'Thở ra, ép hai tay vào nhau trước ngực như đang ôm một thân cây lớn. Nghĩ là dùng ngực kéo, không phải dùng tay.',
             'Siết ngực 1 giây khi hai tay nắm gần chạm nhau.',
             'Hít vào, mở tay ra chậm trong 2–3 giây tới khi thấy ngực căng nhẹ thì dừng, không để tạ chạm chồng.'
@@ -128,7 +129,7 @@ const GYM_EXERCISES = [
         target: 'Vai sau, lưng xô (lưng rộng hình chữ V), lưng giữa, tay trước',
         freq: '2–3 buổi/tuần, cách ngày (VD: T2–T4–T6). Tập bài này ĐẦU buổi khi còn khoẻ.',
         setup: [
-            'Đây là máy hỗ trợ: tạ càng NẶNG thì càng DỄ (tạ đẩy bạn lên). Mức kg cụ thể xem ở phần Lộ trình bên dưới.',
+            'Đây là máy hỗ trợ: tạ càng NẶNG thì càng DỄ (tạ đẩy bạn lên). Mức kg cụ thể xem ở phần Lộ trình ở trên.',
             'Cắm chốt vào chồng tạ ở mức kg của cột mốc bạn đang tập.',
             'Bước lên 2 bậc đứng hai bên, với tay nắm thanh xà trên cùng, rồi quỳ lần lượt từng gối lên đệm đen ở giữa (đệm hạ xuống theo người).',
             'Nắm 2 tay cầm chếch xuống ở hai đầu thanh xà, rộng hơn vai, lòng bàn tay hướng ra trước. Cách nắm này dồn lực vào vai sau và lưng xô.'
@@ -340,6 +341,27 @@ const GYM_TEMPLATES = [
     { id: 'A', name: 'Buổi A: Ngực + Tay trước', items: ['chest-press', 'pec-deck', 'machine-curl', 'hammer-curl', 'lat-pulldown'] },
     { id: 'B', name: 'Buổi B: Toàn thân + tạ tay', items: ['db-goblet-squat', 'leg-press', 'seated-row', 'db-row', 'db-triceps', 'push-up'] }
 ];
+
+// --- Hướng dẫn hít thở cho từng bài ---
+// out: thở ra (miệng) khi dùng sức · in: hít vào (mũi) khi trả tạ · tip: lưu ý riêng
+const GYM_BREATH = {
+    'chest-press': { out: 'Khi đẩy tay cầm ra trước.', in: 'Khi đưa tay cầm về sát ngực, chậm 2–3 giây.', tip: 'Hít đầy bụng trước khi đẩy lần đầu, giữ lưng áp đệm.' },
+    'pec-deck': { out: 'Khi ép hai tay nắm vào nhau trước ngực, thở ra hết lúc siết ngực 1 giây.', in: 'Khi mở tay ra chậm 2–3 giây, cảm nhận ngực căng ra theo hơi thở.', tip: 'Ưỡn ngực khi hít vào giúp ngực mở rộng, ép được sâu hơn.' },
+    'pri13-pullup': { out: 'Khi kéo người lên tới cằm qua xà.', in: 'Khi hạ người xuống chậm 2–3 giây tới tay gần thẳng.', tip: 'Ở dưới cùng hít một hơi, siết bụng rồi mới kéo. Không nín thở cả lần kéo, mặt đỏ, choáng là đang nín thở.' },
+    'assisted-dip': { out: 'Khi đẩy người lên tới tay gần thẳng.', in: 'Khi gập khuỷu hạ người xuống chậm tới 90°.', tip: 'Thở đều theo từng lần, không thở gấp ở giữa động tác.' },
+    'push-up': { out: 'Khi đẩy người lên.', in: 'Khi hạ ngực xuống gần sàn (hoặc ghế).', tip: 'Siết bụng trong lúc thở để lưng không võng.' },
+    'machine-curl': { out: 'Khi cuốn tay đòn lên về phía vai.', in: 'Khi hạ xuống chậm 2–3 giây.', tip: 'Thở ra hết lúc siết bắp tay ở trên cùng, vai vẫn thả lỏng.' },
+    'db-curl': { out: 'Khi cuốn tạ lên ngang vai.', in: 'Khi hạ tạ xuống chậm.', tip: 'Không ngả người ra sau khi thở ra, chỉ cẳng tay chuyển động.' },
+    'hammer-curl': { out: 'Khi cuốn tạ lên.', in: 'Khi hạ tạ xuống.', tip: 'Giữ nhịp đều: 1 giây lên, 2–3 giây xuống.' },
+    'lat-pulldown': { out: 'Khi kéo thanh xuống trước mặt tới ngang cằm hoặc ngực trên.', in: 'Khi trả thanh lên chậm tới khi tay gần thẳng.', tip: 'Hít vào ở trên cùng giúp ngực ưỡn và vai hạ xuống, chuẩn bị kéo tốt hơn.' },
+    'seated-row': { out: 'Khi kéo tay cầm về bụng, ép bả vai.', in: 'Khi trả tay cầm về phía trước, lưng vẫn thẳng.', tip: 'Đừng gù lưng khi hít vào lúc trả tạ.' },
+    'leg-press': { out: 'Khi đạp bàn đạp ra tới chân gần thẳng.', in: 'Khi hạ bàn đạp xuống chậm tới gối 90°.', tip: 'KHÔNG nín thở khi đạp nặng: dễ tăng huyết áp, choáng đầu.' },
+    'db-shoulder-press': { out: 'Khi đẩy tạ thẳng lên trên đầu.', in: 'Khi hạ tạ về ngang tai.', tip: 'Siết bụng khi thở ra để lưng không ưỡn.' },
+    'db-lateral': { out: 'Khi dang tay nâng tạ lên ngang vai.', in: 'Khi hạ tạ xuống chậm 2–3 giây.', tip: 'Vai thả lỏng, không nhún vai theo hơi thở.' },
+    'db-triceps': { out: 'Khi duỗi tay đưa tạ lên trên đầu.', in: 'Khi gập khuỷu hạ tạ ra sau gáy.', tip: 'Siết bụng suốt bài để lưng không ưỡn.' },
+    'db-row': { out: 'Khi kéo tạ lên về phía hông.', in: 'Khi hạ tạ xuống chậm.', tip: 'Thở đều, giữ lưng thẳng song song sàn.' },
+    'db-goblet-squat': { out: 'Khi đạp gót đứng lên.', in: 'Khi ngồi xuống (trước khi xuống hít một hơi đầy bụng).', tip: 'Giữ hơi ở bụng khi ở dưới thấp, thở ra khi qua đoạn khó nhất lúc đứng lên.' }
+};
 
 // --- Lộ trình tập cho từng máy (tick khi đạt cột mốc) ---
 // kg: '{bw0.5}' = 50% cân nặng hiện tại, làm tròn tới 2,5 kg (tự cập nhật khi cân nặng đổi)
